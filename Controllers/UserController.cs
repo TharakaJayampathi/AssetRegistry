@@ -1,4 +1,5 @@
-﻿using AssetRegistry.DTOs.Response;
+﻿using AssetRegistry.Attributes;
+using AssetRegistry.DTOs.Response;
 using AssetRegistry.DTOs.Users;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +11,7 @@ using System.Net;
 namespace AssetRegistry.Controllers
 {
     [Route("api/[controller]")]
+    [HasPermission("User.Read")]
     [ApiController]
     public class UserController : ControllerBase
     {

@@ -1,6 +1,10 @@
+using AssetRegistry.Handlers;
 using AssetRegistry.Models.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +24,43 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Add CORS
+// ---------------------------
+// Add Authentication (JWT)
+// ---------------------------
+var jwtConfig = builder.Configuration.GetSection("Jwt");
+var secret = jwtConfig["Secret"];
+
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+// ---------------------------
+// Add Authorization + Policies
+// ---------------------------
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+builder.Services.AddAuthorization(options =>
+{
+    // Register all permission policies here
+    options.AddPolicy("Company.Read", policy =>
+        policy.Requirements.Add(new PermissionRequirement("Company.Read")));
+
+    options.AddPolicy("User.Read", policy =>
+        policy.Requirements.Add(new PermissionRequirement("User.Read")));
+});
+
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>

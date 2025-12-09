@@ -9,7 +9,7 @@ using System.Net;
 namespace AssetRegistry.Controllers
 {
     [Route("api/[controller]")]
-    //[HasPermission("Attendance.Read")]
+    [HasPermission("Company.Read")]
     [ApiController]
     public class CompanyController : ControllerBase
     {

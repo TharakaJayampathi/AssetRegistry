@@ -1,5 +1,9 @@
-﻿using AssetRegistry.DTOs.LoginDTO;
+﻿using AssetRegistry.DTOs;
+using AssetRegistry.DTOs.LoginDTO;
+using AssetRegistry.DTOs.Tokens;
 using AssetRegistry.DTOs.Users;
+using AssetRegistry.Enums;
+using AssetRegistry.Interfaces;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -539,6 +544,126 @@ namespace AssetRegistry.Controllers
         {
             return new DateTimeOffset(Date).ToUnixTimeSeconds();
         }
+
+        [HttpPost]
+        [Route("security/auth-refresh")]
+        public async Task<IActionResult> RefreshAuthToken(TokenDTO Model)
+        {
+            //await _log.AddAPILog(null, "api/security/auth-refresh", JsonConvert.SerializeObject(Model), "", "", (byte)ApiLogEnum.LOG);
+
+            var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(Model.AccessToken).Payload;
+
+            var _signature = _tokenstring["signature"].ToString();
+            //var _deviceId = _tokenstring["deviceId"].ToString();
+            var _postedUser = _tokenstring["oid"].ToString();
+
+            try
+            {
+                if (Model is null)
+                {
+                    //await _log.AddAPILog(_postedUser, "api/security/auth-refresh", JsonConvert.SerializeObject(Model), "Invalid client request", "Auth Refresh:Error", (byte)ApiLogEnum.ERROR);
+                    return BadRequest("Invalid client request");
+                }
+
+                string accessToken = Model.AccessToken;
+                string refreshToken = Model.RefreshToken;
+
+                var principal = GetPrincipalFromExpiredToken(accessToken);
+                if (principal == null)
+                {
+                    //await _log.AddAPILog(_postedUser, "api/security/auth-refresh", JsonConvert.SerializeObject(Model), "Invalid access token or refresh token", "Auth Refresh:Error", (byte)ApiLogEnum.ERROR);
+                    return BadRequest("Invalid access token or refresh token");
+                }
+
+                string username = principal.Identity.Name;
+
+                //var _user = await _identityService.GetUserByName(username);
+                var _user = await _userManager.FindByNameAsync(username);
+
+                var _isValidRefreshToken = await ValidateRefreshToken(_user.Id, Model.RefreshToken);
+
+                if (!_isValidRefreshToken.Succeeded)
+                {
+                    //await _identityService.RemoveSessionFromDb(_user.Id);
+                    //await _log.AddAPILog(_postedUser, "api/security/auth-refresh", JsonConvert.SerializeObject(Model), $"{_isValidRefreshToken.Message}", "Auth Refresh:Error", (byte)ApiLogEnum.ERROR);
+                    return Unauthorized(_isValidRefreshToken.Message);
+                }
+
+                var newAccessToken = await GenerateToken(_user/*, DeviceId: _deviceId*/);
+                var newRefreshToken = await GenerateRefreshToken(_user.Id);
+
+                //await _log.AddAPILog(_postedUser, "api/security/auth-refresh", JsonConvert.SerializeObject(Model), "", "Auth Refresh:OK", (byte)ApiLogEnum.LOG);
+
+                return Ok(new
+                {
+                    access_token = newAccessToken,
+                    refresh_token = newRefreshToken
+                });
+            }
+            catch (Exception ex)
+            {
+                var _response = JsonConvert.SerializeObject(ex);
+                //await _log.AddAPILog(_postedUser, "api/security/auth-refresh", JsonConvert.SerializeObject(Model), $"{_response}", "Auth Refresh:Error", (byte)ApiLogEnum.ERROR);
+                return UnprocessableEntity(new { code = 422, msg = "Data cannot be Proccessed", data = "" });
+            }
+        }
+
+        private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"])),
+                ValidateLifetime = false
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+
+            if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
+
+
+            return principal;
+
+        }
+
+        private async Task<Result> ValidateRefreshToken(string UserId, string RefreshToken)
+        {
+            var _refreshToken = await _context.UserRefreshTokens.FirstOrDefaultAsync(x => x.UserId == UserId);
+
+            if (_refreshToken is null)
+            {
+                return Result.Failure("Refresh Token Not Found.Please Sign in Using your Username and Password");
+            }
+
+            //_dateTimeService.GetUnixTime()
+            var _nowTime = GetUnixTime(DateTime.UtcNow);
+
+            if ((_refreshToken.RefreshToken == RefreshToken) && (_refreshToken.ExpireOn > _nowTime))
+            {
+                return Result.Success();
+            }
+
+            //return Result.Failure($"Expire: {_refreshToken.ExpireOn} Now: {_nowTime}");
+            return Result.Failure("Refresh Token has been Changed.If This was Done without your Concent Please Sign in Using your Username and Password to Revoke the Current Token");
+        }
+
+        //public async Task RemoveSessionFromDb(string UserId)
+        //{
+        //    var _session = await _context.UserDeviceSessions.Where(x => x.UserId == UserId).ToListAsync();
+
+        //    if (_session.Count() > 0)
+        //    {
+        //        _memoryCache.Remove($"signin-{_session.FirstOrDefault().DeviceId}");
+        //        _context.UserDeviceSessions.RemoveRange(_session);
+        //        await _context.SaveChangesAsync();
+        //    }
+        //}
 
     }
 }

@@ -833,5 +833,31 @@ namespace AssetRegistry.Controllers
             //}
         }
 
+        [AllowAnonymous]
+        //[HasPermission("Users.UserProfile")]
+        [HttpPost]
+        [Route("security/sign-out")]
+        public async Task<IActionResult> Logoff()
+        {
+            var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+            var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+            var _postedUser = _tokenstring["oid"].ToString();
+
+            //await _log.AddAPILog(_postedUser, "api/security/sign-out", $"User Id - {_postedUser}", "", "Session Sign Out", (byte)ApiLogEnum.LOG);
+
+            try
+            {
+                await RemoveLoginSession(_postedUser, "");
+                //await _log.AddAPILog(_postedUser, "api/security/sign-out", $"User Id - {_postedUser}", "", "Session Sign Out:OK", (byte)ApiLogEnum.LOG);
+                return Ok(new { code = 200, msg = "", data = "" });
+            }
+            catch (Exception ex)
+            {
+                var _response = JsonConvert.SerializeObject(ex);
+                //await _log.AddAPILog(null, "api/security/sign-out", $"User Id - {_postedUser}", $"{_response}", "Session Sign Out:Error", (byte)ApiLogEnum.ERROR);
+                return UnprocessableEntity(new { code = 422, msg = "Data cannot be Proccessed", data = "" });
+            }
+        }
+
     }
 }

@@ -118,7 +118,33 @@ namespace AssetRegistry.Controllers
                     }
                 }
                 _role.Name = model.RoleName;
-                await _roleManager.UpdateAsync(_role);
+                var _res = await _roleManager.UpdateAsync(_role);
+                if (_res.Succeeded)
+                {
+                    var roleData = _context.RoleDatas.Where(x => x.RoleId == model.RoleId).FirstOrDefault();
+                    if (roleData != null)
+                    {
+                        roleData.Code = model.Code;
+                        roleData.IsActive = model.IsActive;
+                        _context.RoleDatas.Update(roleData);
+                        await _context.SaveChangesAsync();
+
+                        var _existingRolePermissions = await _context.RolePermissions.Where(x => x.RoleId == model.RoleId).ToListAsync();
+                        _context.RolePermissions.RemoveRange(_existingRolePermissions);
+                        await _context.SaveChangesAsync();
+
+                        List<RolePermission> rolePermissionList = new List<RolePermission>();
+                        foreach (var _permission in model.Permissions)
+                        {
+                            RolePermission rolePermission = new RolePermission();
+                            rolePermission.RoleId = model.RoleId;
+                            rolePermission.PermissionType = _permission;
+                            rolePermissionList.Add(rolePermission);
+                        }
+                        _context.RolePermissions.AddRange(rolePermissionList);
+                        await _context.SaveChangesAsync();
+                    }
+                }
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Role updated successfully", data = "" });
             }
             catch (Exception ex)

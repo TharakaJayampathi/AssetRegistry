@@ -1,7 +1,7 @@
 ﻿using AssetRegistry.Attributes;
-using AssetRegistry.DTOs.Company;
+using AssetRegistry.DTOs.Location;
 using AssetRegistry.DTOs.Response;
-using AssetRegistry.Models.Company;
+using AssetRegistry.Models.Location;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -26,8 +26,8 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var companies = await _context.Companies.ToListAsync();
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = companies });
+                var _locations = await _context.Companies.ToListAsync();
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _locations });
             }
             catch (Exception ex)
             {
@@ -41,8 +41,8 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _company = await _context.Companies.Where(x => x.Id == id).FirstOrDefaultAsync();
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _company });
+                var _location = await _context.Companies.Where(x => x.Id == id).FirstOrDefaultAsync();
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _location });
             }
             catch (Exception ex)
             {
@@ -52,18 +52,20 @@ namespace AssetRegistry.Controllers
 
         [HttpPost]
         [Route("Create")]
-        public async Task<IActionResult> CreateAsync([FromBody] CompanyCreateDTO model)
+        public async Task<IActionResult> CreateAsync([FromBody] LocationCreateDTO model)
         {
             try
             {
-                Company company = new Company();
-                company.Code = model.CompanyId;
-                company.Name = model.Name;
-                company.IsActive = true;
-                _context.Companies.Add(company);
+                Location location = new Location();
+                location.Code = model.LocatonId;
+                location.Address = model.LocationAddress;
+                location.CompanyId = model.CompanyId;
+                location.DivisionId = model.DivisionId;
+                location.IsActive = true;
+                _context.Locations.Add(location);
                 await _context.SaveChangesAsync();
 
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Company created successfully", data = "" });
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Location created successfully", data = "" });
             }
             catch (Exception ex)
             {
@@ -73,24 +75,26 @@ namespace AssetRegistry.Controllers
 
         [HttpPost]
         [Route("Update")]
-        public async Task<IActionResult> UpdatedAsync([FromBody] CompanyUpdateDTO model)
+        public async Task<IActionResult> UpdatedAsync([FromBody] LocationUpdateDTO model)
         {
             try
             {
-                var _company = await _context.Companies.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
-                if (_company != null)
+                var _location = await _context.Locations.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
+                if (_location != null)
                 {
-                    _company.Code = model.CompanyId;
-                    _company.Name = model.Name;
-                    _company.IsActive = model.IsActive;
-                    _context.Companies.Update(_company);
+                    _location.Code = model.LocatonId;
+                    _location.Address = model.LocationAddress;
+                    _location.CompanyId = model.CompanyId;
+                    _location.DivisionId = model.DivisionId;
+                    _location.IsActive = model.IsActive;
+                    _context.Locations.Update(_location);
                     await _context.SaveChangesAsync();
                 }
                 else
                 {
-                    return NotFound(new ResponseDTO { code = 404, msg = "Company not found", data = "" });
+                    return NotFound(new ResponseDTO { code = 404, msg = "Location not found", data = "" });
                 }
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Company updated successfully", data = "" });
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Location updated successfully", data = "" });
             }
             catch (Exception ex)
             {
@@ -104,18 +108,18 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _company = await _context.Companies.Where(x => x.Id == id).FirstOrDefaultAsync();
-                if (_company != null)
+                var _location = await _context.Locations.Where(x => x.Id == id).FirstOrDefaultAsync();
+                if (_location != null)
                 {
                     _company.IsActive = false;
-                    _context.Companies.Update(_company);
+                    _context.Locations.Update(_location);
                     await _context.SaveChangesAsync();
                 }
                 else
                 {
-                    return NotFound(new ResponseDTO { code = 404, msg = "Company not found", data = "" });
+                    return NotFound(new ResponseDTO { code = 404, msg = "Location not found", data = "" });
                 }
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Company deactivate successfully", data = "" });
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Location deactivate successfully", data = "" });
             }
             catch (Exception ex)
             {
@@ -129,18 +133,18 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _company = await _context.Companies.Where(x => x.Id == id).FirstOrDefaultAsync();
-                if (_company != null)
+                var _location = await _context.Locations.Where(x => x.Id == id).FirstOrDefaultAsync();
+                if (_location != null)
                 {
-                    _company.IsActive = false;
-                    _context.Companies.Remove(_company);
+                    _location.IsActive = false;
+                    _context.Locations.Remove(_location);
                     await _context.SaveChangesAsync();
                 }
                 else
                 {
-                    return NotFound(new ResponseDTO { code = 404, msg = "Company not found", data = "" });
+                    return NotFound(new ResponseDTO { code = 404, msg = "Location not found", data = "" });
                 }
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Company deleted successfully", data = "" });
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Location deleted successfully", data = "" });
             }
             catch (Exception ex)
             {

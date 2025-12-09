@@ -1,5 +1,5 @@
 ﻿using AssetRegistry.DTOs;
-using AssetRegistry.DTOs.LoginDTO;
+using AssetRegistry.DTOs.Login;
 using AssetRegistry.DTOs.Tokens;
 using AssetRegistry.Interfaces;
 using AssetRegistry.Models.User;

@@ -1,5 +1,5 @@
 ﻿using AssetRegistry.DTOs;
-using AssetRegistry.DTOs.LoginDTO;
+using AssetRegistry.DTOs.Login;
 using AssetRegistry.Models.User;
 using System.Security.Claims;
 

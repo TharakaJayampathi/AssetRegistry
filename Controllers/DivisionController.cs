@@ -1,7 +1,7 @@
 ﻿using AssetRegistry.Attributes;
-using AssetRegistry.DTOs.Company;
+using AssetRegistry.DTOs.Division;
 using AssetRegistry.DTOs.Response;
-using AssetRegistry.Models.Company;
+using AssetRegistry.Models.Division;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -26,8 +26,8 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var companies = await _context.Companies.ToListAsync();
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = companies });
+                var _divisions = await _context.Divisions.ToListAsync();
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _divisions });
             }
             catch (Exception ex)
             {
@@ -41,8 +41,8 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _company = await _context.Companies.Where(x => x.Id == id).FirstOrDefaultAsync();
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _company });
+                var _division = await _context.Divisions.Where(x => x.Id == id).FirstOrDefaultAsync();
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _division });
             }
             catch (Exception ex)
             {
@@ -52,18 +52,19 @@ namespace AssetRegistry.Controllers
 
         [HttpPost]
         [Route("Create")]
-        public async Task<IActionResult> CreateAsync([FromBody] CompanyCreateDTO model)
+        public async Task<IActionResult> CreateAsync([FromBody] DivisionCreateDTO model)
         {
             try
             {
-                Company company = new Company();
-                company.Code = model.CompanyId;
-                company.Name = model.Name;
-                company.IsActive = true;
-                _context.Companies.Add(company);
+                Division division = new Division();
+                division.Code = model.DivisionId;
+                division.Name = model.DivisionName;
+                division.CompanyId = model.CompanyId;
+                division.IsActive = true;
+                _context.Divisions.Add(division);
                 await _context.SaveChangesAsync();
 
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Company created successfully", data = "" });
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Division created successfully", data = "" });
             }
             catch (Exception ex)
             {
@@ -73,24 +74,25 @@ namespace AssetRegistry.Controllers
 
         [HttpPost]
         [Route("Update")]
-        public async Task<IActionResult> UpdatedAsync([FromBody] CompanyUpdateDTO model)
+        public async Task<IActionResult> UpdatedAsync([FromBody] DivisionUpdateDTO model)
         {
             try
             {
-                var _company = await _context.Companies.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
-                if (_company != null)
+                var _division = await _context.Divisions.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
+                if (_division != null)
                 {
-                    _company.Code = model.CompanyId;
-                    _company.Name = model.Name;
-                    _company.IsActive = model.IsActive;
-                    _context.Companies.Update(_company);
+                    _division.Code = model.DivisionId;
+                    _division.Name = model.DivisionName;
+                    _division.CompanyId = model.CompanyId;
+                    _division.IsActive = model.IsActive;
+                    _context.Divisions.Update(_division);
                     await _context.SaveChangesAsync();
                 }
                 else
                 {
-                    return NotFound(new ResponseDTO { code = 404, msg = "Company not found", data = "" });
+                    return NotFound(new ResponseDTO { code = 404, msg = "Division not found", data = "" });
                 }
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Company updated successfully", data = "" });
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Division updated successfully", data = "" });
             }
             catch (Exception ex)
             {
@@ -104,18 +106,18 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _company = await _context.Companies.Where(x => x.Id == id).FirstOrDefaultAsync();
-                if (_company != null)
+                var _division = await _context.Divisions.Where(x => x.Id == id).FirstOrDefaultAsync();
+                if (_division != null)
                 {
-                    _company.IsActive = false;
-                    _context.Companies.Update(_company);
+                    _division.IsActive = false;
+                    _context.Divisions.Update(_division);
                     await _context.SaveChangesAsync();
                 }
                 else
                 {
-                    return NotFound(new ResponseDTO { code = 404, msg = "Company not found", data = "" });
+                    return NotFound(new ResponseDTO { code = 404, msg = "Division not found", data = "" });
                 }
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Company deactivate successfully", data = "" });
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Division deactivate successfully", data = "" });
             }
             catch (Exception ex)
             {
@@ -129,18 +131,18 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _company = await _context.Companies.Where(x => x.Id == id).FirstOrDefaultAsync();
-                if (_company != null)
+                var _division = await _context.Divisions.Where(x => x.Id == id).FirstOrDefaultAsync();
+                if (_division != null)
                 {
-                    _company.IsActive = false;
-                    _context.Companies.Remove(_company);
+                    _division.IsActive = false;
+                    _context.Divisions.Remove(_division);
                     await _context.SaveChangesAsync();
                 }
                 else
                 {
-                    return NotFound(new ResponseDTO { code = 404, msg = "Company not found", data = "" });
+                    return NotFound(new ResponseDTO { code = 404, msg = "Division not found", data = "" });
                 }
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Company deleted successfully", data = "" });
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Division deleted successfully", data = "" });
             }
             catch (Exception ex)
             {

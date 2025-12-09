@@ -28,7 +28,7 @@ namespace AssetRegistry.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("security/token")]
+        [Route("token")]
         public async Task<IActionResult> Post(LoginDTO Model)
         {
             try
@@ -70,7 +70,7 @@ namespace AssetRegistry.Controllers
         }
 
         [HttpPost]
-        [Route("security/auth-refresh")]
+        [Route("auth-refresh")]
         public async Task<IActionResult> RefreshAuthToken(TokenDTO Model)
         {
             var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(Model.AccessToken).Payload;
@@ -119,7 +119,7 @@ namespace AssetRegistry.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("security/change-password")]
+        [Route("change-password")]
         public async Task<IActionResult> ChangePassword(MobileChangePassword Model)
         {
             try
@@ -156,7 +156,7 @@ namespace AssetRegistry.Controllers
         }
 
         [HttpGet]
-        [Route("security/sessions/get")]
+        [Route("sessions-get")]
         public async Task<IActionResult> GetUserSessions()
         {
             var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
@@ -177,7 +177,7 @@ namespace AssetRegistry.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("security/session/remove/{id}")]
+        [Route("session-remove/{id}")]
         public async Task<IActionResult> RemoveUserSession(string id)
         {
             try
@@ -194,7 +194,7 @@ namespace AssetRegistry.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("security/sign-out")]
+        [Route("sign-out")]
         public async Task<IActionResult> Logoff()
         {
             var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");

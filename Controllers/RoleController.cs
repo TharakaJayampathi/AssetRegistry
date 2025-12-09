@@ -1,5 +1,6 @@
 ﻿using AssetRegistry.DTOs.Response;
 using AssetRegistry.DTOs.Roles;
+using AssetRegistry.Models.Roles;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -58,16 +59,29 @@ namespace AssetRegistry.Controllers
 
         [HttpPost]
         [Route("Create")]
-        public async Task<IActionResult> CreateAsync(string roleName)
+        public async Task<IActionResult> CreateAsync(RoleCreateDTO model)
         {
             try
             {
-                var _role = await _roleManager.FindByNameAsync(roleName.Trim());
+                var _role = await _roleManager.FindByNameAsync(model.RoleName.Trim());
                 if (_role != null)
                 {
                     return UnprocessableEntity(new ResponseDTO { code = (int)HttpStatusCode.InternalServerError, msg = "Role already exists", data = "" });
                 }
-                await _roleManager.CreateAsync(new IdentityRole(roleName));
+                var _res = await _roleManager.CreateAsync(new IdentityRole(model.RoleName));
+                if (_res.Succeeded)
+                {
+                    var _roleDetail = _context.Roles.Where(x => x.Name == model.RoleName).FirstOrDefault();
+                    if (_roleDetail != null)
+                    {
+                        RoleData roleData = new RoleData();
+                        roleData.RoleId = _roleDetail.Id;
+                        roleData.Code = model.Code;
+                        roleData.IsActive = true;
+                        _context.RoleDatas.Add(roleData);
+                        await _context.SaveChangesAsync();
+                    }
+                }
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Role created successfully", data = "" });
             }
             catch (Exception ex)

@@ -1,5 +1,6 @@
 ﻿using AssetRegistry.DTOs.Response;
 using AssetRegistry.DTOs.Roles;
+using AssetRegistry.Models.RolePermissions;
 using AssetRegistry.Models.Roles;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Identity;
@@ -79,6 +80,17 @@ namespace AssetRegistry.Controllers
                         roleData.Code = model.Code;
                         roleData.IsActive = true;
                         _context.RoleDatas.Add(roleData);
+                        await _context.SaveChangesAsync();
+
+                        List<RolePermission> rolePermissionList = new List<RolePermission>();
+                        foreach (var _permission in model.Permissions)
+                        { 
+                            RolePermission rolePermission = new RolePermission();
+                            rolePermission.RoleId = _roleDetail.Id;
+                            rolePermission.PermissionType = _permission;
+                            rolePermissionList.Add(rolePermission);
+                        }
+                        _context.RolePermissions.AddRange(rolePermissionList);
                         await _context.SaveChangesAsync();
                     }
                 }

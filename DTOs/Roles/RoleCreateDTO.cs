@@ -4,6 +4,6 @@
     {
         public string Code { get; set; }
         public string RoleName { get; set; }
-        public List<RolePermissionCreateDTO> Permissions { get; set; }
+        public List<int> Permissions { get; set; }
     }
 }

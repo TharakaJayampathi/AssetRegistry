@@ -1,6 +1,6 @@
 ﻿namespace AssetRegistry.DTOs.Users
 {
-    public class UserListDTO
+    public class UserDTO
     {
         public string? Id { get; set; }
         public string? UserId { get; set; }
@@ -14,6 +14,6 @@
         public string? DivisionId { get; set; }
         public string? DivisionName { get; set; }
         public string? LocationAddress { get; set; }
-        public bool IsActive { get; set; }       
+        public bool IsActive { get; set; }
     }
 }

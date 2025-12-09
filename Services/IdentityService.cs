@@ -309,17 +309,10 @@ namespace AssetRegistry.Services
                                       join ur in _context.UserRoles on us.Id equals ur.UserId
                                       join ro in _context.Roles on ur.RoleId equals ro.Id
                                       where us.Id == user.Id
-                                      select new UserListDTO()
+                                      select new Role()
                                       {
-                                          Id = us.Id,
-                                          FirstName = us.FirstName,
-                                          LastName = us.LastName,
-                                          Email = us.Email,
-                                          Nic = us.Nic,
-                                          Address = us.Address,
-                                          IsActive = us.IsActive,
-                                          RoleId = ur.RoleId,
-                                          RoleName = ro.Name
+                                          Id = ro.Id,
+                                          Name = ro.Name
                                       }).FirstOrDefaultAsync();
 
             var _issuedAt = DateTime.UtcNow;
@@ -347,7 +340,7 @@ namespace AssetRegistry.Services
                         new Claim("family_name", $"{user.LastName}"),
                         new Claim("name", $"{user.FirstName} {user.LastName}"),
                         //new Claim("allowed_apps", $"[{_allowedApps[0]}, {_allowedApps[1]}]"), //passing Module/App Ids
-                        new Claim("role", $"{_userdetails.RoleName}"),
+                        new Claim("role", $"{_userdetails.Name}"),
                         new Claim("timeZone", ""),
                         new Claim("signature", _sessionKey)
                         //new Claim("deviceId", DeviceId)

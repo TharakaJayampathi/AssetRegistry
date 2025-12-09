@@ -37,19 +37,31 @@ namespace AssetRegistry.Controllers
             try
             {
                 var _users = await (from us in _context.ApplicationUsers
-                                    join ur in _context.UserRoles on us.Id equals ur.UserId
-                                    join ro in _context.Roles on ur.RoleId equals ro.Id
+                                    join ur in _context.UserRoles on us.Id equals ur.UserId into ur_join
+                                    from ur in ur_join.DefaultIfEmpty()
+                                    join ro in _context.Roles on ur.RoleId equals ro.Id into ro_join
+                                    from ro in ro_join.DefaultIfEmpty()
+                                    join co in _context.Companies on us.CompanyId equals co.Id into co_join
+                                    from co in co_join.DefaultIfEmpty()
+                                    join di in _context.Divisions on us.DivisionId equals di.Id into di_join
+                                    from di in di_join.DefaultIfEmpty()
+                                    join lo in _context.Locations on us.LocationId equals lo.Id into lo_join
+                                    from lo in lo_join.DefaultIfEmpty()
                                     select new UserListDTO()
                                     {
                                         Id = us.Id,
+                                        UserId = us.Code,
                                         FirstName = us.FirstName,
                                         LastName = us.LastName,
+                                        FullName = $"{us.FirstName} {us.LastName}",
                                         Email = us.Email,
-                                        Nic = us.Nic,
-                                        Address = us.Address,
-                                        IsActive = us.IsActive,
-                                        RoleId = ur.RoleId,
-                                        RoleName = ro.Name
+                                        PhoneNumber = us.PhoneNumber,
+                                        RoleName = ro.Name,
+                                        CompanyName = co.Name,
+                                        DivisionId = di.Code,
+                                        DivisionName = di.Name,
+                                        LocationAddress = lo.Address,
+                                        IsActive = us.IsActive
                                     }).ToListAsync();
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _users });
             }
@@ -68,20 +80,32 @@ namespace AssetRegistry.Controllers
             try
             {
                 var _user = await (from us in _context.ApplicationUsers
-                                   join ur in _context.UserRoles on us.Id equals ur.UserId
-                                   join ro in _context.Roles on ur.RoleId equals ro.Id
+                                   join ur in _context.UserRoles on us.Id equals ur.UserId into ur_join
+                                   from ur in ur_join.DefaultIfEmpty()
+                                   join ro in _context.Roles on ur.RoleId equals ro.Id into ro_join
+                                   from ro in ro_join.DefaultIfEmpty()
+                                   join co in _context.Companies on us.CompanyId equals co.Id into co_join
+                                   from co in co_join.DefaultIfEmpty()
+                                   join di in _context.Divisions on us.DivisionId equals di.Id into di_join
+                                   from di in di_join.DefaultIfEmpty()
+                                   join lo in _context.Locations on us.LocationId equals lo.Id into lo_join
+                                   from lo in lo_join.DefaultIfEmpty()
                                    where us.Id == id
-                                   select new UserListDTO()
+                                   select new UserDTO()
                                    {
                                        Id = us.Id,
+                                       UserId = us.Code,
                                        FirstName = us.FirstName,
                                        LastName = us.LastName,
+                                       FullName = $"{us.FirstName} {us.LastName}",
                                        Email = us.Email,
-                                       Nic = us.Nic,
-                                       Address = us.Address,
-                                       IsActive = us.IsActive,
-                                       RoleId = ur.RoleId,
-                                       RoleName = ro.Name
+                                       PhoneNumber = us.PhoneNumber,
+                                       RoleName = ro.Name,
+                                       CompanyName = co.Name,
+                                       DivisionId = di.Code,
+                                       DivisionName = di.Name,
+                                       LocationAddress = lo.Address,
+                                       IsActive = us.IsActive
                                    }).FirstOrDefaultAsync();
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _user });
             }
@@ -118,12 +142,14 @@ namespace AssetRegistry.Controllers
 
                 ApplicationUser user = new()
                 {
-                    FirstName = model.Email,
+                    FirstName = model.FirstName,
                     LastName = model.LastName,
-                    Nic = model.Nic,
-                    Address = model.Address,
                     Email = model.Email,
                     UserName = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                    CompanyId = model.CompanyId,
+                    DivisionId = model.DivisionId,
+                    LocationId = model.LocationId,
                     SecurityStamp = Guid.NewGuid().ToString(),
                     IsActive = true,
                     CreatedBy = "Admin",
@@ -164,16 +190,36 @@ namespace AssetRegistry.Controllers
                     return NotFound(new ResponseDTO { code = 404, msg = "User not found", data = "" });
                 }
 
+                var _role = await _roleManager.FindByIdAsync(model.RoleId);
+                if (_role == null)
+                {
+                    return UnprocessableEntity(new ResponseDTO { code = (int)HttpStatusCode.InternalServerError, msg = "Role Not Exist", data = "" });
+                }
+
                 _user.FirstName = model.FirstName;
                 _user.LastName = model.LastName;
                 _user.Email = model.Email;
                 _user.UserName = model.Email;
+                _user.PhoneNumber = model.PhoneNumber;
+                _user.CompanyId = model.CompanyId;
+                _user.DivisionId = model.DivisionId;
+                _user.LocationId = model.LocationId;
+                _user.IsActive = model.IsActive;
 
                 var result = await _userManager.UpdateAsync(_user);
-                var _token = await _userManager.GeneratePasswordResetTokenAsync(_user);
-                await _userManager.ResetPasswordAsync(_user, _token, model.Password);
+                if (result.Succeeded)
+                {
+                    var _inRole = await _userManager.GetRolesAsync(_user);
+                    if (_inRole.Count() > 0)
+                    {
+                        await _userManager.RemoveFromRolesAsync(_user, _inRole);
+                    }
+                    await _userManager.AddToRoleAsync(_user, _role.Name);
 
-                if (!result.Succeeded)
+                    var _token = await _userManager.GeneratePasswordResetTokenAsync(_user);
+                    await _userManager.ResetPasswordAsync(_user, _token, model.Password);
+                }
+                else
                 {
                     return UnprocessableEntity(new ResponseDTO { code = (int)HttpStatusCode.InternalServerError, msg = "User update failed", data = "" });
                 }

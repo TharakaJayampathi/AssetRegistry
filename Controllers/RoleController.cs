@@ -153,5 +153,27 @@ namespace AssetRegistry.Controllers
                 return UnprocessableEntity(new ResponseDTO { code = (int)HttpStatusCode.InternalServerError, msg = $"{ex.Message}", data = "" });
             }
         }
+
+        [HasPermission("Role.Delete")]
+        [HttpPut]
+        [Route("deactivate{id}")]
+        public async Task<IActionResult> DeactivateAsync(string id)
+        {
+            try
+            {
+                var roleData = _context.RoleDatas.Where(x => x.RoleId == id).FirstOrDefault();
+                if (roleData != null)
+                {
+                    roleData.IsActive = false;
+                    _context.RoleDatas.Update(roleData);
+                    await _context.SaveChangesAsync();
+                }
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Role deactivate successfully", data = "" });
+            }
+            catch (Exception ex)
+            {
+                return UnprocessableEntity(new ResponseDTO { code = (int)HttpStatusCode.InternalServerError, msg = $"{ex.Message}", data = "" });
+            }
+        }
     }
 }

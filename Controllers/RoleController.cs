@@ -1,4 +1,5 @@
-﻿using AssetRegistry.DTOs.Response;
+﻿using AssetRegistry.Attributes;
+using AssetRegistry.DTOs.Response;
 using AssetRegistry.DTOs.Roles;
 using AssetRegistry.Models.Role;
 using AssetRegistry.Models.RolePermission;
@@ -24,6 +25,7 @@ namespace AssetRegistry.Controllers
             _context = context;
         }
 
+        [HasPermission("Role.Read")]
         [HttpGet]
         [Route("GetAll")]
         public async Task<IActionResult> GetAllAsync()
@@ -39,6 +41,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("Role.Read")]
         [HttpGet]
         [Route("GetById{id}")]
         public async Task<IActionResult> GetByIdAsync(string id)
@@ -54,6 +57,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("Role.Create")]
         [HttpPost]
         [Route("Create")]
         public async Task<IActionResult> CreateAsync(RoleCreateDTO model)
@@ -98,7 +102,8 @@ namespace AssetRegistry.Controllers
             }
         }
 
-        [HttpPost]
+        [HasPermission("Role.Update")]
+        [HttpPut]
         [Route("Update")]
         public async Task<IActionResult> UpdateAsync(RoleUpdateDTO model)
         {

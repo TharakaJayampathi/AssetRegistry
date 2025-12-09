@@ -9,7 +9,6 @@ using System.Net;
 namespace AssetRegistry.Controllers
 {
     [Route("api/[controller]")]
-    [HasPermission("Company.Read")]
     [ApiController]
     public class DivisionController : ControllerBase
     {
@@ -20,6 +19,7 @@ namespace AssetRegistry.Controllers
             _context = context;
         }
 
+        [HasPermission("Division.Read")]
         [HttpGet]
         [Route("GetAll")]
         public async Task<IActionResult> GetAllAsync()
@@ -35,6 +35,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("Division.Read")]
         [HttpGet]
         [Route("GetById{id}")]
         public async Task<IActionResult> GetByIdAsync(int id)
@@ -50,6 +51,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("Division.Create")]
         [HttpPost]
         [Route("Create")]
         public async Task<IActionResult> CreateAsync([FromBody] DivisionCreateDTO model)
@@ -72,7 +74,8 @@ namespace AssetRegistry.Controllers
             }
         }
 
-        [HttpPost]
+        [HasPermission("Division.Update")]
+        [HttpPut]
         [Route("Update")]
         public async Task<IActionResult> UpdatedAsync([FromBody] DivisionUpdateDTO model)
         {
@@ -100,6 +103,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("Division.Delete")]
         [HttpPut]
         [Route("Deactivate{id}")]
         public async Task<IActionResult> DeactivateAsync(int id)
@@ -125,6 +129,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("Division.Delete")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)

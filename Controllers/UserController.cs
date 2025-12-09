@@ -11,7 +11,6 @@ using System.Net;
 namespace AssetRegistry.Controllers
 {
     [Route("api/[controller]")]
-    [HasPermission("User.Read")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -29,6 +28,8 @@ namespace AssetRegistry.Controllers
             _context = context;
         }
 
+
+        [HasPermission("User.Read")]
         [HttpGet]
         [Route("GetAll")]
         public async Task<IActionResult> GetAllAsync()
@@ -58,6 +59,8 @@ namespace AssetRegistry.Controllers
             }
         }
 
+
+        [HasPermission("User.Read")]
         [HttpGet]
         [Route("GetById{id}")]
         public async Task<IActionResult> GetByIdAsync(string id)
@@ -88,6 +91,8 @@ namespace AssetRegistry.Controllers
             }
         }
 
+
+        [HasPermission("User.Create")]
         [HttpPost]
         [Route("Create")]
         public async Task<IActionResult> CreateAsync([FromBody] UserCreateDTO model)
@@ -141,6 +146,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("User.Update")]
         [HttpPut]
         [Route("Update")]
         public async Task<IActionResult> UpdateAsync([FromBody] UserUpdateDTO model)
@@ -179,6 +185,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("User.Delete")]
         [HttpPut]
         [Route("Deactivate{id}")]
         public async Task<IActionResult> DeactivateAsync(string id)

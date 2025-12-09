@@ -9,7 +9,6 @@ using System.Net;
 namespace AssetRegistry.Controllers
 {
     [Route("api/[controller]")]
-    [HasPermission("Company.Read")]
     [ApiController]
     public class LocationController : ControllerBase
     {
@@ -20,6 +19,7 @@ namespace AssetRegistry.Controllers
             _context = context;
         }
 
+        [HasPermission("Location.Read")]
         [HttpGet]
         [Route("GetAll")]
         public async Task<IActionResult> GetAllAsync()
@@ -35,6 +35,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("Location.Read")]
         [HttpGet]
         [Route("GetById{id}")]
         public async Task<IActionResult> GetByIdAsync(int id)
@@ -50,6 +51,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("Location.Create")]
         [HttpPost]
         [Route("Create")]
         public async Task<IActionResult> CreateAsync([FromBody] LocationCreateDTO model)
@@ -73,7 +75,8 @@ namespace AssetRegistry.Controllers
             }
         }
 
-        [HttpPost]
+        [HasPermission("Location.Update")]
+        [HttpPut]
         [Route("Update")]
         public async Task<IActionResult> UpdatedAsync([FromBody] LocationUpdateDTO model)
         {
@@ -102,6 +105,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("Location.Delete")]
         [HttpPut]
         [Route("Deactivate{id}")]
         public async Task<IActionResult> DeactivateAsync(int id)
@@ -111,7 +115,7 @@ namespace AssetRegistry.Controllers
                 var _location = await _context.Locations.Where(x => x.Id == id).FirstOrDefaultAsync();
                 if (_location != null)
                 {
-                    _company.IsActive = false;
+                    _location.IsActive = false;
                     _context.Locations.Update(_location);
                     await _context.SaveChangesAsync();
                 }
@@ -127,6 +131,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
+        [HasPermission("Location.Delete")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)

@@ -10,25 +10,15 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// -----------------------
-// Add services
-// -----------------------
-
-// Add HttpContextAccessor (needed for ApplicationDbContext logging)
 builder.Services.AddHttpContextAccessor();
 
-// Configure DbContext with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// ---------------------------
-// Add Authentication (JWT)
-// ---------------------------
 var jwtConfig = builder.Configuration.GetSection("Jwt");
 var secret = jwtConfig["Secret"];
 
@@ -47,9 +37,6 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-// ---------------------------
-// Add Authorization + Policies
-// ---------------------------
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
@@ -64,7 +51,6 @@ builder.Services.AddAuthorization(options =>
         policy.Requirements.Add(new PermissionRequirement("User.Read")));
 });
 
-// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -76,31 +62,21 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Add controllers
 builder.Services.AddControllers();
 
-// Add Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// -----------------------
-// Build the app
-// -----------------------
 var app = builder.Build();
 
-// Enable Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Enable CORS
 app.UseCors("AllowAll");
 
-// Enable Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map controllers
 app.MapControllers();
 
-// Run the app
 app.Run();

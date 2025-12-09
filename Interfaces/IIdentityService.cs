@@ -17,5 +17,9 @@ namespace AssetRegistry.Interfaces
         Task AddRefreshToken(string UserId, string RefreshToken, DateTime ExpireOn);
         ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
         Task<Result> ValidateRefreshToken(string UserId, string RefreshToken);
+        Task<Result> ChangePassword(string UserId, string OldPassword, string NewPassword);
+        Task<IEnumerable<UsersView>> GetLoginSessions();
+        Task RemoveLoginSession(string UserId, string DeviceId);
+        Task RemoveSessionFromDb(string UserId);
     }
 }

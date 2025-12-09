@@ -1,6 +1,7 @@
 ﻿using AssetRegistry.DTOs;
 using AssetRegistry.DTOs.LoginDTO;
 using AssetRegistry.DTOs.Users;
+using AssetRegistry.Extensions;
 using AssetRegistry.Interfaces;
 using AssetRegistry.Models.Permissions;
 using AssetRegistry.Models.Roles;
@@ -675,5 +676,75 @@ namespace AssetRegistry.Services
         //        await _context.SaveChangesAsync();
         //    }
         //}
+
+        public async Task<Result> ChangePassword(string UserId, string OldPassword, string NewPassword)
+        {
+            var _user = await _userManager.FindByIdAsync(UserId);
+
+            var result = await _userManager.ChangePasswordAsync(_user, OldPassword, NewPassword);
+
+            return result.ToApplicationResult();
+        }
+
+        public async Task<IEnumerable<UsersView>> GetLoginSessions()
+        {
+            List<UsersView> _lst = new();
+
+            //Dictionary<string, object> cacheValues = new Dictionary<string, object>();
+            //var _users = await GetUsers();
+
+            //foreach (var cacheEntry in _users.Users)
+            //{
+            //    var key = cacheEntry.Id;
+
+            //    if (_memoryCache.TryGetValue($"signin-{key}", out var value))
+            //    {
+            //        _lst.Add(new UsersView
+            //        {
+            //            Id = cacheEntry.Id,
+            //            UserName = cacheEntry.UserName,
+            //            FirstName = cacheEntry.FirstName,
+            //            LastName = cacheEntry.LastName
+            //        });
+            //        //cacheValues[key] = value;
+            //    }
+            //}
+
+            return _lst;
+        }
+
+        public async Task RemoveLoginSession(string UserId, string DeviceId)
+        {
+            try
+            {
+                //var _session = await _context.UserDeviceSessions
+                //    .Where(_context => _context.UserId == UserId).ToListAsync();
+
+                //if (_session.Count() > 0)
+                //{
+                //    _context.UserDeviceSessions.RemoveRange(_session);
+                //}
+
+                //_memoryCache.Remove($"signin-{DeviceId}");
+
+                await RemoveSessionFromDb(UserId);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        public async Task RemoveSessionFromDb(string UserId)
+        {
+            //var _session = await _context.UserDeviceSessions.Where(x => x.UserId == UserId).ToListAsync();
+
+            //if (_session.Count() > 0)
+            //{
+            //    _memoryCache.Remove($"signin-{_session.FirstOrDefault().DeviceId}");
+            //    _context.UserDeviceSessions.RemoveRange(_session);
+            //    await _context.SaveChangesAsync();
+            //}
+        }
     }
 }

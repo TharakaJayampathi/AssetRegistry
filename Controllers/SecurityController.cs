@@ -189,7 +189,7 @@ namespace AssetRegistry.Controllers
 
                 if (_user != null)
                 {
-                    var res = await ChangePassword(_user.Id, Model.OldPassword, Model.NewPassword);
+                    var res = await _identityService.ChangePassword(_user.Id, Model.OldPassword, Model.NewPassword);
 
                     if (res.Succeeded)
                     {
@@ -225,15 +225,6 @@ namespace AssetRegistry.Controllers
             }
         }
 
-        private async Task<Result> ChangePassword(string UserId, string OldPassword, string NewPassword)
-        {
-            var _user = await _userManager.FindByIdAsync(UserId);
-
-            var result = await _userManager.ChangePasswordAsync(_user, OldPassword, NewPassword);
-
-            return result.ToApplicationResult();
-        }
-
         //[AllowAnonymous]
         [HttpGet]
         [Route("security/sessions/get")]
@@ -247,7 +238,7 @@ namespace AssetRegistry.Controllers
 
             try
             {
-                await GetLoginSessions();
+                await _identityService.GetLoginSessions();
                 //await _log.AddAPILog(_postedUser, "security/sessions/get", "", "", "Get Sessions:OK", (byte)ApiLogEnum.LOG);
                 return Ok();
             }
@@ -259,32 +250,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
-        private async Task<IEnumerable<UsersView>> GetLoginSessions()
-        {
-            List<UsersView> _lst = new();
-
-            //Dictionary<string, object> cacheValues = new Dictionary<string, object>();
-            //var _users = await GetUsers();
-
-            //foreach (var cacheEntry in _users.Users)
-            //{
-            //    var key = cacheEntry.Id;
-
-            //    if (_memoryCache.TryGetValue($"signin-{key}", out var value))
-            //    {
-            //        _lst.Add(new UsersView
-            //        {
-            //            Id = cacheEntry.Id,
-            //            UserName = cacheEntry.UserName,
-            //            FirstName = cacheEntry.FirstName,
-            //            LastName = cacheEntry.LastName
-            //        });
-            //        //cacheValues[key] = value;
-            //    }
-            //}
-
-            return _lst;
-        }
+        
 
         [AllowAnonymous]
         //[HasPermission("Users.RemoveSession")]
@@ -296,7 +262,7 @@ namespace AssetRegistry.Controllers
 
             try
             {
-                await RemoveLoginSession(id, "");
+                await _identityService.RemoveLoginSession(id, "");
                 //await _log.AddAPILog(id, "api/security/session/remove", $"User Id - {id}", "", "Session Remove:OK", (byte)ApiLogEnum.LOG);
                 return Ok();
             }
@@ -308,39 +274,7 @@ namespace AssetRegistry.Controllers
             }
         }
 
-        private async Task RemoveLoginSession(string UserId, string DeviceId)
-        {
-            try
-            {
-                //var _session = await _context.UserDeviceSessions
-                //    .Where(_context => _context.UserId == UserId).ToListAsync();
-
-                //if (_session.Count() > 0)
-                //{
-                //    _context.UserDeviceSessions.RemoveRange(_session);
-                //}
-
-                //_memoryCache.Remove($"signin-{DeviceId}");
-
-                await RemoveSessionFromDb(UserId);
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
-
-        private async Task RemoveSessionFromDb(string UserId)
-        {
-            //var _session = await _context.UserDeviceSessions.Where(x => x.UserId == UserId).ToListAsync();
-
-            //if (_session.Count() > 0)
-            //{
-            //    _memoryCache.Remove($"signin-{_session.FirstOrDefault().DeviceId}");
-            //    _context.UserDeviceSessions.RemoveRange(_session);
-            //    await _context.SaveChangesAsync();
-            //}
-        }
+        
 
         [AllowAnonymous]
         //[HasPermission("Users.UserProfile")]
@@ -356,7 +290,7 @@ namespace AssetRegistry.Controllers
 
             try
             {
-                await RemoveLoginSession(_postedUser, "");
+                await _identityService.RemoveLoginSession(_postedUser, "");
                 //await _log.AddAPILog(_postedUser, "api/security/sign-out", $"User Id - {_postedUser}", "", "Session Sign Out:OK", (byte)ApiLogEnum.LOG);
                 return Ok(new { code = 200, msg = "", data = "" });
             }

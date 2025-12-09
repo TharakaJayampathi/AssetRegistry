@@ -1,4 +1,4 @@
-﻿namespace AssetRegistry.DTOs.Roles
+﻿namespace AssetRegistry.DTOs.Role
 {
     public class RoleUpdateDTO
     {

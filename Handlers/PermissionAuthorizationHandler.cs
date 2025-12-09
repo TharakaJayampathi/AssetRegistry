@@ -27,7 +27,7 @@ namespace AssetRegistry.Handlers
             var _httpresource = (DefaultHttpContext)context.Resource;
 
             var asdas = context.User.Identities;
-            if (context.User.IsInRole("SuperAdmin1"))
+            if (context.User.IsInRole("SuperAdmin2"))
             {
                 //throw new PermissionDeniedException(HttpStatusCode.Unauthorized);
                 context.Succeed(requirement);

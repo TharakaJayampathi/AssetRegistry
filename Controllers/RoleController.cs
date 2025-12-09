@@ -1,6 +1,6 @@
 ﻿using AssetRegistry.Attributes;
 using AssetRegistry.DTOs.Response;
-using AssetRegistry.DTOs.Roles;
+using AssetRegistry.DTOs.Role;
 using AssetRegistry.Models.Role;
 using AssetRegistry.Models.RolePermission;
 using Microsoft.AspNetCore.Identity;
@@ -32,8 +32,55 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var roles = await _context.Roles.ToListAsync();
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = roles });
+                var _roles = await _context.Roles.ToListAsync();
+                var _roleDatas = await _context.RoleDatas.ToListAsync();
+                var _rolePermissions = await _context.RolePermissions.ToListAsync();
+                var _permissions = await _context.Permissions.ToListAsync();
+
+                List<RoleListDTO> rolesList = new List<RoleListDTO>();
+                foreach (var _role in _roles)
+                {
+                    RoleListDTO role = new RoleListDTO();
+                    role.Id = _role.Id;
+                    role.RoleName = _role.Name;
+
+                    List<string> permissionList = new List<string>();
+
+                    if (_role.Name == "SuperAdmin")
+                    {
+                        var _permissionList = _permissions
+                                .Where(x => x.IsActive == true)
+                                .Select(x => x.Name)
+                                .ToList();
+                        foreach (var _perm in _permissionList)
+                        {
+                            permissionList.Add(_perm);
+                        }
+                    }
+                    else
+                    {
+                        var _rolePermissionsByRoleId = _rolePermissions.Where(x => x.RoleId == _role.Id).ToList();
+                        foreach (var _rolePermissionByRoleId in _rolePermissionsByRoleId)
+                        {
+                            var _permission = _permissions
+                                    .Where(x => x.Type == _rolePermissionByRoleId.PermissionType)
+                                    .Select(x => x.Name)
+                                    .FirstOrDefault();
+                            permissionList.Add(_permission);
+                        }
+                    }
+                    role.Permissions = permissionList;
+
+                    var _roleDataByRoleId = _roleDatas.Where(x => x.RoleId == _role.Id).FirstOrDefault();
+                    if (_roleDataByRoleId != null)
+                    {
+                        role.IsActive = _roleDataByRoleId.IsActive;
+                    }
+
+                    rolesList.Add(role);
+                }
+
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = rolesList });
             }
             catch (Exception ex)
             {

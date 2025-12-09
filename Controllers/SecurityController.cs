@@ -3,6 +3,7 @@ using AssetRegistry.DTOs.LoginDTO;
 using AssetRegistry.DTOs.Tokens;
 using AssetRegistry.DTOs.Users;
 using AssetRegistry.Enums;
+using AssetRegistry.Extensions;
 using AssetRegistry.Interfaces;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Authorization;
@@ -664,6 +665,65 @@ namespace AssetRegistry.Controllers
         //        await _context.SaveChangesAsync();
         //    }
         //}
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("security/change-password")]
+        public async Task<IActionResult> ChangePassword(MobileChangePassword Model)
+        {
+            //await _log.AddAPILog(null, "api/security/change-password", JsonConvert.SerializeObject(Model), "", "", (byte)ApiLogEnum.LOG);
+
+            try
+            {
+                //var _user = await _identityService.GetUserByName(Model.Username);
+                var _user = await _userManager.FindByNameAsync(Model.Username);
+
+                if (_user != null)
+                {
+                    var res = await ChangePassword(_user.Id, Model.OldPassword, Model.NewPassword);
+
+                    if (res.Succeeded)
+                    {
+                        //await _activityLogRepository.AddActivityLog("User", Model.Username, "Change Password", $"{_user.FirstName} {_user.LastName} Password Changed");
+                        //await _log.AddAPILog(_user.Id, "api/security/change-password", JsonConvert.SerializeObject(Model), JsonConvert.SerializeObject(res), "Change Password:OK", (byte)ApiLogEnum.LOG);
+
+                        return Ok(new
+                        {
+                            code = 200,
+                            msg = "Password Updated Successfuly"
+                        });
+                    }
+
+                    //await _log.AddAPILog(_user.Id, "api/security/change-password", JsonConvert.SerializeObject(Model), JsonConvert.SerializeObject(res), "Change Password:Error", (byte)ApiLogEnum.ERROR);
+
+                    return UnprocessableEntity(new
+                    {
+                        code = 422,
+                        msg = "Password Cannot be Changed"
+                    });
+                }
+                else
+                {
+                    //await _log.AddAPILog(null, "api/security/change-password", JsonConvert.SerializeObject(Model), "User Not Found", "Change Password:Error", (byte)ApiLogEnum.ERROR);
+                    return UnprocessableEntity(new { code = 422, msg = "User Not Found" });
+                }
+            }
+            catch (Exception ex)
+            {
+                var _response = JsonConvert.SerializeObject(ex);
+                //await _log.AddAPILog(null, "api/security/change-password", JsonConvert.SerializeObject(Model), $"{_response}", "Change Password:Error", (byte)ApiLogEnum.ERROR);
+                return Problem(detail: $"{ex.Message}", statusCode: 500, title: "Server Error");
+            }
+        }
+
+        private async Task<Result> ChangePassword(string UserId, string OldPassword, string NewPassword)
+        {
+            var _user = await _userManager.FindByIdAsync(UserId);
+
+            var result = await _userManager.ChangePasswordAsync(_user, OldPassword, NewPassword);
+
+            return result.ToApplicationResult();
+        }
 
     }
 }

@@ -77,7 +77,7 @@ namespace AssetRegistry.Controllers
                                        IsActive = us.IsActive,
                                        RoleId = ur.RoleId,
                                        RoleName = ro.Name
-                                   }).ToListAsync();
+                                   }).FirstOrDefaultAsync();
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _user });
             }
             catch (Exception ex)

@@ -1,5 +1,6 @@
 ﻿using AssetRegistry.DTOs;
 using AssetRegistry.DTOs.LoginDTO;
+using AssetRegistry.DTOs.Users;
 using AssetRegistry.Enums;
 using AssetRegistry.Interfaces;
 using AssetRegistry.Models.User;
@@ -25,7 +26,6 @@ namespace AssetRegistry.Controllers
     public class SecurityController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly IPermissionService _permissionService;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly string? _key;
         private readonly int _validity;
@@ -33,17 +33,12 @@ namespace AssetRegistry.Controllers
         private readonly int _refreshTokenValidity;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
-        private readonly IClaimStore _claimStore;
-        private readonly IDateTimeService _dateTimeService;
 
         public SecurityController(
             IConfiguration configuration,
             SignInManager<ApplicationUser> signInManager,
-            IPermissionService permissionService,
             UserManager<ApplicationUser> userManager,
-            ApplicationDbContext context,
-            IClaimStore claimStore,
-            IDateTimeService dateTimeService)
+            ApplicationDbContext context)
         {
             _refreshTokenValidity = Convert.ToInt32(configuration.GetSection("Jwt")["RefreshTokenValidity"]);
             _validity = Convert.ToInt32(configuration.GetSection("Jwt")["Validity"]);
@@ -52,11 +47,8 @@ namespace AssetRegistry.Controllers
 
             _configuration = configuration;
             _signInManager = signInManager;
-            _permissionService = permissionService;
             _userManager = userManager;
             _context = context;
-            _claimStore = claimStore;
-            _dateTimeService = dateTimeService;
         }
 
         [AllowAnonymous]
@@ -127,14 +119,11 @@ namespace AssetRegistry.Controllers
                             code = 200,
                             msg = "success",
                             access_token = _jwtToken,
-                            //refresh_token = _refreshToken,
+                            refresh_token = _refreshToken,
                             issued_at = _issuedat,
                             expires_on = _expireson
                         };
-
-                        //await SetLoginSession(_jwtToken, _userSessionValidity);
                         return _json;
-
                     }
                     else
                     {
@@ -182,19 +171,34 @@ namespace AssetRegistry.Controllers
         private async Task<string> GenerateToken(ApplicationUser user, string SessionKey = "")
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
-            var _permissions = await _permissionService.GetPermissions(user.Id);
-            //var _userdetails = await GetUserProfile(user.Id);
+            //var _permissions = await _permissionService.GetPermissions(user.Id);
+            var _userdetails = await (from us in _context.ApplicationUsers
+                                      join ur in _context.UserRoles on us.Id equals ur.UserId
+                                      join ro in _context.Roles on ur.RoleId equals ro.Id
+                                      where us.Id == user.Id
+                                      select new UserListDTO()
+                                      {
+                                          Id = us.Id,
+                                          FirstName = us.FirstName,
+                                          LastName = us.LastName,
+                                          Email = us.Email,
+                                          Nic = us.Nic,
+                                          Address = us.Address,
+                                          IsActive = us.IsActive,
+                                          RoleId = ur.RoleId,
+                                          RoleName = ro.Name
+                                      }).FirstOrDefaultAsync();
 
             var _issuedAt = DateTime.UtcNow;
             var _notBefore = _issuedAt;
 
             var _expiresAt = _issuedAt.AddDays(_validity);
 
-            //var _sessionKey = GenerateSignature();
+            var _sessionKey = GenerateSignature();
 
             if (!string.IsNullOrEmpty(SessionKey))
             {
-                //_sessionKey = SessionKey;
+                _sessionKey = SessionKey;
             }
 
             List<string> _userPermissions = new List<string>();
@@ -207,15 +211,15 @@ namespace AssetRegistry.Controllers
                         new Claim("given_name", $"{user.FirstName}"),
                         new Claim("family_name", $"{user.LastName}"),
                         new Claim("name", $"{user.FirstName} {user.LastName}"),
-                        //new Claim("role", $"{_userdetails.RoleName}"),
+                        new Claim("role", $"{_userdetails.RoleName}"),
                         new Claim("timeZone", ""),
-                        //new Claim("signature", _sessionKey)
+                        new Claim("signature", _sessionKey)
                     };
 
-            foreach (var permission in _permissions)
-            {
-                _userPermissions.Add(permission);
-            }
+            //foreach (var permission in _permissions)
+            //{
+            //    _userPermissions.Add(permission);
+            //}
 
             var _permissionArray = string.Join(",", _userPermissions.ToArray());
             _claims.Add(new Claim("permissions", $"{_permissionArray}"));

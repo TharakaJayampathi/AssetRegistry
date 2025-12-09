@@ -5,7 +5,10 @@ using AssetRegistry.DTOs.Users;
 using AssetRegistry.Enums;
 using AssetRegistry.Extensions;
 using AssetRegistry.Interfaces;
+using AssetRegistry.Models.Permissions;
+using AssetRegistry.Models.Roles;
 using AssetRegistry.Models.User;
+using AssetRegistry.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -232,6 +235,40 @@ namespace AssetRegistry.Controllers
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
             //var _permissions = await _permissionService.GetPermissions(user.Id);
+            var _userRole = await (from userRole in _context.UserRoles
+                                               join ro in _context.Roles on userRole.RoleId equals ro.Id
+                                               where userRole.UserId == user.Id
+                                               select new Role()
+                                               {
+                                                   Id = ro.Id,
+                                                   Name = ro.Name
+                                               }).FirstOrDefaultAsync();
+
+            List<string> _permissions = new List<string>();
+
+            if (_userRole.Name == "SuperAdmin")
+            {
+                _permissions = await _context.Permissions
+                                /*.Where(x => x.IsActive == true)*/
+                                .Select(x => x.Name)
+                                .ToListAsync();
+            }
+            else
+            {
+                _permissions = await (from pe in _context.Permissions
+                                      join rp in _context.RolePermissions on pe.Id equals rp.PermissionType
+                                      join ro in _context.Roles on rp.RoleId equals ro.Id
+                                      where ro.Id == _userRole.Id
+                                      select new Permission()
+                                      {
+                                          Id = pe.Id,
+                                          Name = pe.Name,
+                                          Type = pe.Type
+                                      })
+                                      .Select(x => x.Name)
+                                      .ToListAsync();
+            }
+
             //var _userdetails = await _identityService.GetUserProfile(user.Id);
             var _userdetails = await (from us in _context.ApplicationUsers
                                       join ur in _context.UserRoles on us.Id equals ur.UserId
@@ -281,13 +318,10 @@ namespace AssetRegistry.Controllers
                         //new Claim("deviceId", DeviceId)
                     };
 
-            //foreach (var permission in _permissions)
-            //{
-            //    _userPermissions.Add(permission);
-            //}
-
-            _userPermissions.Add("Company.Read");
-            _userPermissions.Add("User.Read");
+            foreach (var permission in _permissions)
+            {
+                _userPermissions.Add(permission);
+            }
 
             var _permissionArray = string.Join(",", _userPermissions.ToArray());
             _claims.Add(new Claim("permissions", $"{_permissionArray}"));

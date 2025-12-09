@@ -1,4 +1,5 @@
-﻿using AssetRegistry.DTOs.LoginDTO;
+﻿using AssetRegistry.DTOs;
+using AssetRegistry.DTOs.LoginDTO;
 using AssetRegistry.DTOs.Users;
 using AssetRegistry.Interfaces;
 using AssetRegistry.Models.Permissions;
@@ -523,5 +524,156 @@ namespace AssetRegistry.Services
         {
             return new DateTimeOffset(Date).ToUnixTimeSeconds();
         }
+
+        //public async Task<UsersView> GetUserProfile(string UserKey)
+        //{
+        //    Guid _userKey;
+
+        //    var _allClaims = await _claimStore.GetClaims(ClaimCategories.MANAGE_USERS);
+
+        //    if (Guid.TryParse(UserKey, out _userKey))
+        //    {
+        //        var _user = await (from us in _context.Users
+        //                               //let div = (_context.DivisionUsers.Where(x => x.UserId == us.Id).ToList())
+        //                           join usr in _context.UserRoles on us.Id equals usr.UserId
+        //                           join role in _context.Roles on usr.RoleId equals role.Id
+        //                           where us.Id == UserKey
+        //                           select new UsersView
+        //                           {
+        //                               Id = us.Id,
+        //                               FirstName = us.FirstName,
+        //                               LastName = us.LastName,
+        //                               //Designation = us.Designation,
+        //                               IsActive = us.IsActive,
+        //                               PhoneNumber = us.PhoneNumber,
+        //                               Email = us.Email,
+        //                               RoleName = role.Name,
+        //                               RoleId = role.Id,
+        //                               UserName = us.UserName,
+        //                               //DivisionUsers = div,
+
+        //                           }).FirstOrDefaultAsync();
+
+        //        var _userClaims = await _context.UserClaims.Where(x => x.UserId == _user.Id).ToListAsync();
+
+        //        List<UserClaim> _lst = new List<UserClaim>();
+
+        //        foreach (var claim in _allClaims)
+        //        {
+        //            if (_userClaims.Where(x => x.ClaimType == claim.Type).FirstOrDefault() != null)
+        //            {
+        //                _lst.Add(new UserClaim { ClaimType = claim.Type, IsSelected = true });
+        //            }
+        //            else
+        //            {
+        //                _lst.Add(new UserClaim { ClaimType = claim.Type, IsSelected = false });
+        //            }
+        //        }
+
+        //        _user.UserClaims = _lst;
+
+        //        return _user;
+        //    }
+        //    else
+        //    {
+        //        var _user = await (from us in _context.Users
+        //                               //let div = (_context.DivisionUsers.Where(x => x.UserId == us.Id).ToList())
+        //                           join usr in _context.UserRoles on us.Id equals usr.UserId
+        //                           join role in _context.Roles on usr.RoleId equals role.Id
+        //                           where us.Email == UserKey
+        //                           select new UsersView
+        //                           {
+        //                               Id = us.Id,
+        //                               FirstName = us.FirstName,
+        //                               LastName = us.LastName,
+        //                               //Designation = us.Designation,
+        //                               IsActive = us.IsActive,
+        //                               PhoneNumber = us.PhoneNumber,
+        //                               Email = us.Email,
+        //                               RoleName = role.Name,
+        //                               RoleId = role.Id,
+        //                               UserName = us.UserName,
+        //                               //DivisionUsers = div,
+
+        //                           }).FirstOrDefaultAsync();
+
+        //        var _userClaims = await _context.UserClaims.Where(x => x.UserId == _user.Id).ToListAsync();
+
+        //        List<UserClaim> _lst = new List<UserClaim>();
+
+        //        foreach (var claim in _allClaims)
+        //        {
+        //            if (_userClaims.Where(x => x.ClaimType == claim.Type).FirstOrDefault() != null)
+        //            {
+        //                _lst.Add(new UserClaim { ClaimType = claim.Type, IsSelected = true });
+        //            }
+        //            else
+        //            {
+        //                _lst.Add(new UserClaim { ClaimType = claim.Type, IsSelected = false });
+        //            }
+        //        }
+
+        //        _user.UserClaims = _lst;
+
+        //        return _user;
+        //    }
+        //}
+
+        public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"])),
+                ValidateLifetime = false
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+
+            if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
+
+
+            return principal;
+
+        }
+
+        public async Task<Result> ValidateRefreshToken(string UserId, string RefreshToken)
+        {
+            var _refreshToken = await _context.UserRefreshTokens.FirstOrDefaultAsync(x => x.UserId == UserId);
+
+            if (_refreshToken is null)
+            {
+                return Result.Failure("Refresh Token Not Found.Please Sign in Using your Username and Password");
+            }
+
+            //_dateTimeService.GetUnixTime()
+            var _nowTime = GetUnixTime(DateTime.UtcNow);
+
+            if ((_refreshToken.RefreshToken == RefreshToken) && (_refreshToken.ExpireOn > _nowTime))
+            {
+                return Result.Success();
+            }
+
+            //return Result.Failure($"Expire: {_refreshToken.ExpireOn} Now: {_nowTime}");
+            return Result.Failure("Refresh Token has been Changed.If This was Done without your Concent Please Sign in Using your Username and Password to Revoke the Current Token");
+        }
+
+        //public async Task RemoveSessionFromDb(string UserId)
+        //{
+        //    var _session = await _context.UserDeviceSessions.Where(x => x.UserId == UserId).ToListAsync();
+
+        //    if (_session.Count() > 0)
+        //    {
+        //        _memoryCache.Remove($"signin-{_session.FirstOrDefault().DeviceId}");
+        //        _context.UserDeviceSessions.RemoveRange(_session);
+        //        await _context.SaveChangesAsync();
+        //    }
+        //}
     }
 }

@@ -1,5 +1,7 @@
-﻿using AssetRegistry.DTOs.LoginDTO;
+﻿using AssetRegistry.DTOs;
+using AssetRegistry.DTOs.LoginDTO;
 using AssetRegistry.Models.User;
+using System.Security.Claims;
 
 namespace AssetRegistry.Interfaces
 {
@@ -13,5 +15,7 @@ namespace AssetRegistry.Interfaces
         Task<bool> SetLoginSession(string Session, int Validity, /*string DeviceId, */bool IsNewUser = false);
         Task AddAuthToken(string UserId, string AuthToken, DateTime ExpireOn);
         Task AddRefreshToken(string UserId, string RefreshToken, DateTime ExpireOn);
+        ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+        Task<Result> ValidateRefreshToken(string UserId, string RefreshToken);
     }
 }

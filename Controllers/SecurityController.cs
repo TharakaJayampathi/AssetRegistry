@@ -177,7 +177,7 @@ namespace AssetRegistry.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("session-remove/{id}")]
+        [Route("session-remove{id}")]
         public async Task<IActionResult> RemoveUserSession(string id)
         {
             try

@@ -2,7 +2,6 @@
 using AssetRegistry.DTOs.Roles;
 using AssetRegistry.Models.RolePermissions;
 using AssetRegistry.Models.Roles;
-using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,16 +13,13 @@ namespace AssetRegistry.Controllers
     [ApiController]
     public class RoleController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _context;
 
         public RoleController(
-            UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ApplicationDbContext context)
         {
-            _userManager = userManager;
             _roleManager = roleManager;
             _context = context;
         }
@@ -84,7 +80,7 @@ namespace AssetRegistry.Controllers
 
                         List<RolePermission> rolePermissionList = new List<RolePermission>();
                         foreach (var _permission in model.Permissions)
-                        { 
+                        {
                             RolePermission rolePermission = new RolePermission();
                             rolePermission.RoleId = _roleDetail.Id;
                             rolePermission.PermissionType = _permission;

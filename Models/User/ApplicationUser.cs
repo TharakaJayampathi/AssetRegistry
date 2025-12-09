@@ -6,8 +6,12 @@ namespace AssetRegistry.Models.User
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string Code { get; set; }
         public string? Nic { get; set; }
         public string? Address { get; set; }
+        public int CompanyId { get; set; }
+        public int DivisionId { get; set; }
+        public int LocationId { get; set; }
         public bool IsActive { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }

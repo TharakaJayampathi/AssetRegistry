@@ -58,7 +58,7 @@ namespace AssetRegistry.Controllers
             try
             {
                 Company company = new Company();
-                company.CompanyId = model.CompanyId;
+                company.Code = model.CompanyId;
                 company.Name = model.Name;
                 company.IsActive = true;
                 _context.Companies.Add(company);
@@ -81,7 +81,7 @@ namespace AssetRegistry.Controllers
                 var _company = await _context.Companies.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
                 if (_company != null)
                 {
-                    _company.CompanyId = model.CompanyId;
+                    _company.Code = model.CompanyId;
                     _company.Name = model.Name;
                     _company.IsActive = model.IsActive;
                     _context.Companies.Update(_company);

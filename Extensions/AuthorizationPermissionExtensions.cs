@@ -1,5 +1,6 @@
 ﻿using AssetRegistry.Handlers;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 namespace AssetRegistry.Extensions
@@ -75,6 +76,40 @@ namespace AssetRegistry.Extensions
                     policy.Requirements.Add(new PermissionRequirement("Location.Update")));
                 options.AddPolicy("Location.Delete", policy =>
                     policy.Requirements.Add(new PermissionRequirement("Location.Delete")));
+            });
+
+            return services;
+        }
+
+        public static IServiceCollection AddSwaggerWithJwt(this IServiceCollection services)
+        {
+            services.AddSwaggerGen(c =>
+            {
+                // Enable JWT authorization input box in Swagger
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter JWT like: Bearer {your token}"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+                });
             });
 
             return services;

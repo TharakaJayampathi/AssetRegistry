@@ -31,11 +31,50 @@ namespace AssetRegistry.Extensions
         {
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Company.Read", policy =>
-                    policy.Requirements.Add(new PermissionRequirement("Company.Read")));
-
                 options.AddPolicy("User.Read", policy =>
                     policy.Requirements.Add(new PermissionRequirement("User.Read")));
+                options.AddPolicy("User.Create", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("User.Create")));
+                options.AddPolicy("User.Update", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("User.Update")));
+                options.AddPolicy("User.Delete", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("User.Delete")));
+
+                options.AddPolicy("Role.Read", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Role.Read")));
+                options.AddPolicy("Role.Create", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Role.Create")));
+                options.AddPolicy("Role.Update", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Role.Update")));
+                options.AddPolicy("Role.Delete", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Role.Delete")));
+
+                options.AddPolicy("Company.Read", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Company.Read")));
+                options.AddPolicy("Company.Create", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Company.Create")));
+                options.AddPolicy("Company.Update", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Company.Update")));
+                options.AddPolicy("Company.Delete", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Company.Delete")));
+
+                options.AddPolicy("Division.Read", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Division.Read")));
+                options.AddPolicy("Division.Create", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Division.Create")));
+                options.AddPolicy("Division.Update", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Division.Update")));
+                options.AddPolicy("Division.Delete", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Division.Delete")));
+
+                options.AddPolicy("Location.Read", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Location.Read")));
+                options.AddPolicy("Location.Create", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Location.Create")));
+                options.AddPolicy("Location.Update", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Location.Update")));
+                options.AddPolicy("Location.Delete", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("Location.Delete")));
             });
 
             return services;

@@ -21,7 +21,7 @@ namespace AssetRegistry.Controllers
 
         [HasPermission("Location.Read")]
         [HttpGet]
-        [Route("GetAll")]
+        [Route("get-all")]
         public async Task<IActionResult> GetAllAsync()
         {
             try
@@ -37,7 +37,7 @@ namespace AssetRegistry.Controllers
 
         [HasPermission("Location.Read")]
         [HttpGet]
-        [Route("GetById{id}")]
+        [Route("get-by-id{id}")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
             try
@@ -53,7 +53,7 @@ namespace AssetRegistry.Controllers
 
         [HasPermission("Location.Create")]
         [HttpPost]
-        [Route("Create")]
+        [Route("create")]
         public async Task<IActionResult> CreateAsync([FromBody] LocationCreateDTO model)
         {
             try
@@ -77,7 +77,7 @@ namespace AssetRegistry.Controllers
 
         [HasPermission("Location.Update")]
         [HttpPut]
-        [Route("Update")]
+        [Route("update")]
         public async Task<IActionResult> UpdatedAsync([FromBody] LocationUpdateDTO model)
         {
             try
@@ -107,7 +107,7 @@ namespace AssetRegistry.Controllers
 
         [HasPermission("Location.Delete")]
         [HttpPut]
-        [Route("Deactivate{id}")]
+        [Route("deactivate{id}")]
         public async Task<IActionResult> DeactivateAsync(int id)
         {
             try
@@ -133,7 +133,7 @@ namespace AssetRegistry.Controllers
 
         [HasPermission("Location.Delete")]
         [HttpDelete]
-        [Route("{id}")]
+        [Route("delete{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             try

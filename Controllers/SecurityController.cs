@@ -1,19 +1,12 @@
-﻿using AssetRegistry.DTOs;
-using AssetRegistry.DTOs.LoginDTO;
+﻿using AssetRegistry.DTOs.LoginDTO;
 using AssetRegistry.DTOs.Users;
-using AssetRegistry.Enums;
-using AssetRegistry.Interfaces;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -56,9 +49,12 @@ namespace AssetRegistry.Controllers
         [Route("security/token")]
         public async Task<IActionResult> Post(LoginDTO Model)
         {
+            //await _log.AddAPILog(null, "api/security/token", JsonConvert.SerializeObject(Model), "", "", (byte)ApiLogEnum.LOG);
+
             try
             {
                 string? _userId = null;
+                //var _user = await _identityService.GetUserByName(Model.Username);
                 var _user = await _userManager.FindByNameAsync(Model.Username);
 
                 if (_user is not null)
@@ -70,49 +66,69 @@ namespace AssetRegistry.Controllers
 
                 if (_loginRes.code == 200)
                 {
+                    //await _log.AddAPILog(_userId, "api/security/token", JsonConvert.SerializeObject(Model), $"Device Id - {Model.DeviceId}", "Device Login:OK", (byte)ApiLogEnum.LOG);
+
+                    //await _loginHistoryReopsitory
+                    //        .AddLoginHistory(new domain.Entities.LoginHistory
+                    //        {
+                    //            UserId = Model.Username,
+                    //            LoginDate = DateTime.Now,
+                    //        });
+
+                    //await _log.AddAPILog(_userId, "api/security/token", JsonConvert.SerializeObject(Model), JsonConvert.SerializeObject(_loginRes), "Secuirity Token:OK", (byte)ApiLogEnum.LOG);
                     return Ok(_loginRes);
                 }
                 else if (_loginRes.code == 400)
                 {
+                    //await _log.AddAPILog(_userId, "api/security/token", JsonConvert.SerializeObject(Model), JsonConvert.SerializeObject(_loginRes), "Secuirity Token:Error", (byte)ApiLogEnum.ERROR);
                     return NotFound(_loginRes);
                 }
                 else if (_loginRes.code == 401)
                 {
+                    //await _log.AddAPILog(_userId, "api/security/token", JsonConvert.SerializeObject(Model), JsonConvert.SerializeObject(_loginRes), "Secuirity Token:Error", (byte)ApiLogEnum.ERROR);
                     return Unauthorized(_loginRes);
                 }
                 else if (_loginRes.code == 404)
                 {
+                    //await _log.AddAPILog(_userId, "api/security/token", JsonConvert.SerializeObject(Model), JsonConvert.SerializeObject(_loginRes), "Secuirity Token:Error", (byte)ApiLogEnum.ERROR);
                     return Unauthorized(_loginRes);
                 }
                 else
                 {
+                    //await _log.AddAPILog(_userId, "api/security/token", JsonConvert.SerializeObject(Model), JsonConvert.SerializeObject(_loginRes), "Secuirity Token:Error", (byte)ApiLogEnum.ERROR);
                     return Unauthorized(_loginRes);
                 }
             }
             catch (Exception ex)
             {
                 var _response = JsonConvert.SerializeObject(ex);
+                //await _log.AddAPILog(null, "api/security/token", JsonConvert.SerializeObject(Model), $"{_response}", "Secuirity Token:Error", (byte)ApiLogEnum.ERROR);
                 return UnprocessableEntity(new { code = 422, msg = "Data cannot be Proccessed", data = "" });
             }
         }
 
-        private async Task<LoginResponseDTO> GetToken(string userName, string password, string AppId = "")
+        private async Task<LoginResponseDTO> GetToken(string userName, string password, string AppId = "", string DeviceId = "")
         {
+            //ApplicationUser _user = await _identityService.GetUserByName(userName);
             ApplicationUser _user = await _userManager.FindByNameAsync(userName);
 
             if (_user is not null)
             {
+                //if (!string.IsNullOrEmpty(DeviceId))
+                //{
                 if (_user.IsActive)
                 {
                     var _signIn = await _signInManager.PasswordSignInAsync(_user, password, true, false);
 
                     if (_signIn.Succeeded)
                     {
+                        //string _jwtToken = await GenerateToken(_user, DeviceId: DeviceId);
                         string _jwtToken = await GenerateToken(_user);
                         string _refreshToken = await GenerateRefreshToken(_user.Id);
 
                         var _issuedat = DateTime.UtcNow;
                         var _expireson = _issuedat.AddDays(_validity);
+                        //var _expireson = DateTime.Now.AddMinutes(10);
                         var _json = new LoginResponseDTO
                         {
                             token_type = "Bearer",
@@ -123,8 +139,22 @@ namespace AssetRegistry.Controllers
                             issued_at = _issuedat,
                             expires_on = _expireson
                         };
+
+                        //if (_user.IsNewUser)
+                        //{
+                        //    await _identityService.SetLoginSession(_jwtToken, _userSessionValidity, DeviceId, true);
+                        //    return _json;
+                        //}
+                        //else
+                        //{
+                        //    await _identityService.RemoveSessionFromDb(_user.Id);
+                        //    await _identityService.SetLoginSession(_jwtToken, _userSessionValidity, DeviceId);
+                        //    return _json;
+                        //}
+
                         await SetLoginSession(_jwtToken, _userSessionValidity);
                         return _json;
+
                     }
                     else
                     {
@@ -134,7 +164,9 @@ namespace AssetRegistry.Controllers
                             code = 401,
                             msg = "Sign In Failed.Username or Password is Incorrect",
                             access_token = "",
-                            refresh_token = ""
+                            refresh_token = "",
+                            //issued_at = "",
+                            //expires_on = ""
                         };
 
                         return _json;
@@ -148,11 +180,29 @@ namespace AssetRegistry.Controllers
                         code = 401,
                         msg = "User is Not Acitve",
                         access_token = "",
-                        refresh_token = ""
+                        refresh_token = "",
+                        //issued_at = "",
+                        //expires_on = ""
                     };
 
                     return _json;
                 }
+                //}
+                //else
+                //{
+                //    var _json = new LoginResponseDTO
+                //    {
+                //        token_type = "",
+                //        code = 401,
+                //        msg = "Device Id is Required",
+                //        access_token = "",
+                //        refresh_token = "",
+                //        //issued_at = "",
+                //        //expires_on = ""
+                //    };
+
+                //    return _json;
+                //}
             }
             else
             {
@@ -162,7 +212,9 @@ namespace AssetRegistry.Controllers
                     code = 404,
                     msg = "User Not Found",
                     access_token = "",
-                    refresh_token = ""
+                    refresh_token = "",
+                    //issued_at = "",
+                    //expires_on = ""
                 };
 
                 return _json;
@@ -173,6 +225,7 @@ namespace AssetRegistry.Controllers
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
             //var _permissions = await _permissionService.GetPermissions(user.Id);
+            //var _userdetails = await _identityService.GetUserProfile(user.Id);
             var _userdetails = await (from us in _context.ApplicationUsers
                                       join ur in _context.UserRoles on us.Id equals ur.UserId
                                       join ro in _context.Roles on ur.RoleId equals ro.Id
@@ -194,6 +247,7 @@ namespace AssetRegistry.Controllers
             var _notBefore = _issuedAt;
 
             var _expiresAt = _issuedAt.AddDays(_validity);
+            //var _expiresAt = DateTime.Now.AddMinutes(10);
 
             var _sessionKey = GenerateSignature();
 
@@ -202,6 +256,7 @@ namespace AssetRegistry.Controllers
                 _sessionKey = SessionKey;
             }
 
+            //string[] _allowedApps = new string[] { "appid1", "appid2" };//Enabled if Multiple Modules available in the App
             List<string> _userPermissions = new List<string>();
 
             List<Claim> _claims = new List<Claim> {
@@ -212,9 +267,11 @@ namespace AssetRegistry.Controllers
                         new Claim("given_name", $"{user.FirstName}"),
                         new Claim("family_name", $"{user.LastName}"),
                         new Claim("name", $"{user.FirstName} {user.LastName}"),
+                        //new Claim("allowed_apps", $"[{_allowedApps[0]}, {_allowedApps[1]}]"), //passing Module/App Ids
                         new Claim("role", $"{_userdetails.RoleName}"),
                         new Claim("timeZone", ""),
                         new Claim("signature", _sessionKey)
+                        //new Claim("deviceId", DeviceId)
                     };
 
             //foreach (var permission in _permissions)
@@ -232,24 +289,47 @@ namespace AssetRegistry.Controllers
             var token = new JwtSecurityToken(
                 _configuration["Jwt:ValidAudience"],
                 _configuration["Jwt:ValidIssuer"],
+                //claims: claims,
                 claims: _claims,
                 notBefore: _notBefore,
                 expires: _expiresAt,
                 signingCredentials: _signIn);
 
+            //try
+            //{
+            //    var _userrole = await _identityService.GetUserRoles(user.Id);
+
+            //    LoginHistoryDTO loginHistroy = new();
+            //    loginHistroy.UserId = $"{user.UserName} - {string.Join(',', _userrole)}";
+            //    loginHistroy.DeviceId = "Mobile";
+            //    loginHistroy.LoginDate = DateTimeHelper.GetCurrentTime();
+            //    await _loginHistoryReopsitory.AddLoginHistory(loginHistroy);
+            //}
+            //catch
+            //{
+
+            //}
+
             var jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
             await AddAuthToken(user.Id, jwtToken, DateTime.UtcNow.AddDays(_validity));
+            //await _identityService.AddAuthToken(user.Id, jwtToken, DateTime.UtcNow.AddMinutes(10));
             return jwtToken;
         }
 
         private async Task<string> GenerateRefreshToken(string UserId)
         {
+            //var randomNumber = new byte[64];
+            //using var rng = RandomNumberGenerator.Create();
+            //rng.GetBytes(randomNumber);
+
             var _refreshToken = GenerateSignature();
+
             await AddRefreshToken(UserId, _refreshToken, DateTime.UtcNow.AddDays(_refreshTokenValidity));
+            //await _identityService.AddRefreshToken(UserId, _refreshToken, DateTime.UtcNow.AddMinutes(15));
             return _refreshToken;
         }
 
-        private async Task<bool> SetLoginSession(string Session, int Validity, bool IsNewUser = false)
+        private async Task<bool> SetLoginSession(string Session, int Validity, /*string DeviceId, */bool IsNewUser = false)
         {
             var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(Session).Payload;
 
@@ -265,6 +345,27 @@ namespace AssetRegistry.Controllers
                 _maxValidity = Validity;
             }
 
+            //var _user = await _userManager.FindByIdAsync(_postedUser);
+            //if (_user != null)
+            //{
+            //    if (IsNewUser && _user.FrAvailable == true)
+            //    {
+            //        _user.IsNewUser = false;
+            //        await _userManager.UpdateAsync(_user);
+            //    }
+            //}
+
+            //var _hasDeviceSession = await AddSessionToDb(DeviceId, _postedUser);
+
+            //if (!_hasDeviceSession)
+            //{
+            //    return false;
+            //}
+            //else
+            //{
+            //    _memoryCache.Set($"signin-{DeviceId}", $"{unixTime}_{_signature}", TimeSpan.FromDays(_maxValidity));
+            //    return true;
+            //}
             return true;
         }
 

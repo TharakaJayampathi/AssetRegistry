@@ -11,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace AssetRegistry.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {

@@ -10,7 +10,7 @@ using System.Net;
 
 namespace AssetRegistry.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/user")]
     [ApiController]
     public class UserController : ControllerBase
     {

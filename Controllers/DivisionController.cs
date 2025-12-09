@@ -8,7 +8,7 @@ using System.Net;
 
 namespace AssetRegistry.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/division")]
     [ApiController]
     public class DivisionController : ControllerBase
     {

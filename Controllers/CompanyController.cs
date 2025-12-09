@@ -8,7 +8,7 @@ using System.Net;
 
 namespace AssetRegistry.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/company")]
     [ApiController]
     public class CompanyController : ControllerBase
     {

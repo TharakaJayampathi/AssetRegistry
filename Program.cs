@@ -1,3 +1,4 @@
+using AssetRegistry.Extensions;
 using AssetRegistry.Handlers;
 using AssetRegistry.Interfaces;
 using AssetRegistry.Models.User;
@@ -41,15 +42,7 @@ builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
-builder.Services.AddAuthorization(options =>
-{
-    // Register all permission policies here
-    options.AddPolicy("Company.Read", policy =>
-        policy.Requirements.Add(new PermissionRequirement("Company.Read")));
-
-    options.AddPolicy("User.Read", policy =>
-        policy.Requirements.Add(new PermissionRequirement("User.Read")));
-});
+builder.Services.AddAuthorizationPermissions();
 
 builder.Services.AddCors(options =>
 {

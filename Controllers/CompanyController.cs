@@ -15,8 +15,7 @@ namespace AssetRegistry.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        public CompanyController(
-            ApplicationDbContext context)
+        public CompanyController(ApplicationDbContext context)
         {
             _context = context;
         }

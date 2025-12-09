@@ -237,7 +237,7 @@ namespace AssetRegistry.Controllers
                 signingCredentials: _signIn);
 
             var jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
-            //await AddAuthToken(user.Id, jwtToken, DateTime.UtcNow.AddDays(_validity));
+            await AddAuthToken(user.Id, jwtToken, DateTime.UtcNow.AddDays(_validity));
             return jwtToken;
         }
 
@@ -372,35 +372,35 @@ namespace AssetRegistry.Controllers
 
         }
 
-        //public async Task AddAuthToken(string UserId, string AuthToken, DateTime ExpireOn)
-        //{
-        //    try
-        //    {
-        //        var _authToken = await _context.UserAuthTokens.FirstOrDefaultAsync(x => x.UserId == UserId);
+        private async Task AddAuthToken(string UserId, string AuthToken, DateTime ExpireOn)
+        {
+            try
+            {
+                var _authToken = await _context.UserAuthTokens.FirstOrDefaultAsync(x => x.UserId == UserId);
 
-        //        if (_authToken is null)
-        //        {
-        //            await _context.UserAuthTokens.AddAsync(new UserAuthToken
-        //            {
-        //                UserId = UserId,
-        //                AuthToken = AuthToken,
-        //                ExpireOn = _dateTimeService.GetUnixTime(ExpireOn)
-        //            });
-        //        }
-        //        else
-        //        {
-        //            _authToken.AuthToken = AuthToken;
-        //            _authToken.ExpireOn = _dateTimeService.GetUnixTime(ExpireOn);
-        //        }
+                if (_authToken is null)
+                {
+                    await _context.UserAuthTokens.AddAsync(new UserAuthToken
+                    {
+                        UserId = UserId,
+                        AuthToken = AuthToken,
+                        ExpireOn = GetUnixTime(ExpireOn)
+                    });
+                }
+                else
+                {
+                    _authToken.AuthToken = AuthToken;
+                    _authToken.ExpireOn = GetUnixTime(ExpireOn);
+                }
 
-        //        var _res = await _context.SaveChangesAsync();
-        //    }
-        //    catch (Exception ex)
-        //    {
+                var _res = await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
 
-        //        throw new Exception(ex.Message);
-        //    }
-        //}
+                throw new Exception(ex.Message);
+            }
+        }
 
         //public async Task AddRefreshToken(string UserId, string RefreshToken, DateTime ExpireOn)
         //{
@@ -431,6 +431,11 @@ namespace AssetRegistry.Controllers
         //        throw new Exception(ex.Message);
         //    }
         //}
+
+        private long GetUnixTime(DateTime Date)
+        {
+            return new DateTimeOffset(Date).ToUnixTimeSeconds();
+        }
 
     }
 }

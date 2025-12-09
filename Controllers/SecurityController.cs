@@ -244,6 +244,7 @@ namespace AssetRegistry.Controllers
         private async Task<string> GenerateRefreshToken(string UserId)
         {
             var _refreshToken = GenerateSignature();
+            await AddRefreshToken(UserId, _refreshToken, DateTime.UtcNow.AddDays(_refreshTokenValidity));
             return _refreshToken;
         }
 
@@ -402,35 +403,35 @@ namespace AssetRegistry.Controllers
             }
         }
 
-        //public async Task AddRefreshToken(string UserId, string RefreshToken, DateTime ExpireOn)
-        //{
-        //    try
-        //    {
-        //        var _refreshToken = await _context.UserRefreshTokens.FirstOrDefaultAsync(x => x.UserId == UserId);
+        private async Task AddRefreshToken(string UserId, string RefreshToken, DateTime ExpireOn)
+        {
+            try
+            {
+                var _refreshToken = await _context.UserRefreshTokens.FirstOrDefaultAsync(x => x.UserId == UserId);
 
-        //        if (_refreshToken is null)
-        //        {
-        //            await _context.UserRefreshTokens.AddAsync(new UserRefreshToken
-        //            {
-        //                UserId = UserId,
-        //                RefreshToken = RefreshToken,
-        //                ExpireOn = _dateTimeService.GetUnixTime(ExpireOn)
-        //            });
-        //        }
-        //        else
-        //        {
-        //            _refreshToken.RefreshToken = RefreshToken;
-        //            _refreshToken.ExpireOn = _dateTimeService.GetUnixTime(ExpireOn);
-        //        }
+                if (_refreshToken is null)
+                {
+                    await _context.UserRefreshTokens.AddAsync(new UserRefreshToken
+                    {
+                        UserId = UserId,
+                        RefreshToken = RefreshToken,
+                        ExpireOn = GetUnixTime(ExpireOn)
+                    });
+                }
+                else
+                {
+                    _refreshToken.RefreshToken = RefreshToken;
+                    _refreshToken.ExpireOn = GetUnixTime(ExpireOn);
+                }
 
-        //        var _res = await _context.SaveChangesAsync();
-        //    }
-        //    catch (Exception ex)
-        //    {
+                var _res = await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
 
-        //        throw new Exception(ex.Message);
-        //    }
-        //}
+                throw new Exception(ex.Message);
+            }
+        }
 
         private long GetUnixTime(DateTime Date)
         {

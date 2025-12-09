@@ -27,7 +27,7 @@ namespace AssetRegistry.Handlers
             var _httpresource = (DefaultHttpContext)context.Resource;
 
             var asdas = context.User.Identities;
-            if (context.User.IsInRole("SuperAdmin"))
+            if (context.User.IsInRole("SuperAdmin1"))
             {
                 //throw new PermissionDeniedException(HttpStatusCode.Unauthorized);
                 context.Succeed(requirement);
@@ -74,8 +74,11 @@ namespace AssetRegistry.Handlers
                         var _oid = token.Claims.Where(x => x.Type == "oid").FirstOrDefault().Value;
                         var _signature = token.Claims.Where(x => x.Type == "signature").FirstOrDefault().Value;
 
-                        var _permissions = token.Claims.Where(x => x.Type == "permissions")
-                        .Select(x => x.Value).FirstOrDefault();
+                        //var _permissions = token.Claims.Where(x => x.Type == "permissions")
+                        //.Select(x => x.Value).FirstOrDefault();
+                        List<string> _permissions = new List<string>();
+                        _permissions.Add("Company.Read");
+                        _permissions.Add("User.Read");
                         //var permissionList = JsonConvert.DeserializeObject<HashSet<string>>(_permissions);
 
                         if (await _identity.IsSessionValid(jwtToken))

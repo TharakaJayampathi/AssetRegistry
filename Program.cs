@@ -1,5 +1,7 @@
 using AssetRegistry.Handlers;
+using AssetRegistry.Interfaces;
 using AssetRegistry.Models.User;
+using AssetRegistry.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +50,8 @@ builder.Services.AddAuthentication("Bearer")
 // ---------------------------
 // Add Authorization + Policies
 // ---------------------------
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 builder.Services.AddAuthorization(options =>

@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -284,6 +285,9 @@ namespace AssetRegistry.Controllers
             //{
             //    _userPermissions.Add(permission);
             //}
+
+            _userPermissions.Add("Company.Read");
+            _userPermissions.Add("User.Read");
 
             var _permissionArray = string.Join(",", _userPermissions.ToArray());
             _claims.Add(new Claim("permissions", $"{_permissionArray}"));

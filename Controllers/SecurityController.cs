@@ -123,6 +123,7 @@ namespace AssetRegistry.Controllers
                             issued_at = _issuedat,
                             expires_on = _expireson
                         };
+                        await SetLoginSession(_jwtToken, _userSessionValidity);
                         return _json;
                     }
                     else

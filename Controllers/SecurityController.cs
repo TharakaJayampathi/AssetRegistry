@@ -247,24 +247,24 @@ namespace AssetRegistry.Controllers
             return _refreshToken;
         }
 
-        //public async Task<bool> SetLoginSession(string Session, int Validity, bool IsNewUser = false)
-        //{
-        //    var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(Session).Payload;
+        private async Task<bool> SetLoginSession(string Session, int Validity, bool IsNewUser = false)
+        {
+            var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(Session).Payload;
 
-        //    var _postedUser = _tokenstring["oid"].ToString();
-        //    var _signature = _tokenstring["signature"].ToString();
+            var _postedUser = _tokenstring["oid"].ToString();
+            var _signature = _tokenstring["signature"].ToString();
 
-        //    long unixTime = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
-        //    int _maxValidity = 2000;
+            long unixTime = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
+            int _maxValidity = 2000;
 
-        //    if (Validity > 0)
-        //    {
-        //        unixTime = DateTimeOffset.UtcNow.AddHours(Validity).ToUnixTimeSeconds();
-        //        _maxValidity = Validity;
-        //    }
+            if (Validity > 0)
+            {
+                unixTime = DateTimeOffset.UtcNow.AddHours(Validity).ToUnixTimeSeconds();
+                _maxValidity = Validity;
+            }
 
-        //    return true;
-        //}
+            return true;
+        }
 
         //public async Task<UsersView> GetUserProfile(string UserKey)
         //{

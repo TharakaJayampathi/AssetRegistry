@@ -1,4 +1,5 @@
-﻿using AssetRegistry.DTOs.Company;
+﻿using AssetRegistry.Attributes;
+using AssetRegistry.DTOs.Company;
 using AssetRegistry.DTOs.Response;
 using AssetRegistry.Models.Company;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using System.Net;
 namespace AssetRegistry.Controllers
 {
     [Route("api/[controller]")]
+    //[HasPermission("Attendance.Read")]
     [ApiController]
     public class CompanyController : ControllerBase
     {

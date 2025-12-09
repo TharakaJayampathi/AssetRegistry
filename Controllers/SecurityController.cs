@@ -725,5 +725,113 @@ namespace AssetRegistry.Controllers
             return result.ToApplicationResult();
         }
 
+        //[AllowAnonymous]
+        [HttpGet]
+        [Route("security/sessions/get")]
+        public async Task<IActionResult> GetUserSessions()
+        {
+            var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+            var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+            var _postedUser = _tokenstring["oid"].ToString();
+
+            //await _log.AddAPILog(_postedUser, "security/sessions/get", "", "", "", (byte)ApiLogEnum.LOG);
+
+            try
+            {
+                await GetLoginSessions();
+                //await _log.AddAPILog(_postedUser, "security/sessions/get", "", "", "Get Sessions:OK", (byte)ApiLogEnum.LOG);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                var _response = JsonConvert.SerializeObject(ex);
+                //await _log.AddAPILog(_postedUser, "api/security/frs-login", "", $"{_response}", "Get Sessions:Error", (byte)ApiLogEnum.ERROR);
+                return UnprocessableEntity(new { code = 422, msg = "Data cannot be Proccessed", data = "" });
+            }
+        }
+
+        private async Task<IEnumerable<UsersView>> GetLoginSessions()
+        {
+            List<UsersView> _lst = new();
+
+            //Dictionary<string, object> cacheValues = new Dictionary<string, object>();
+            //var _users = await GetUsers();
+
+            //foreach (var cacheEntry in _users.Users)
+            //{
+            //    var key = cacheEntry.Id;
+
+            //    if (_memoryCache.TryGetValue($"signin-{key}", out var value))
+            //    {
+            //        _lst.Add(new UsersView
+            //        {
+            //            Id = cacheEntry.Id,
+            //            UserName = cacheEntry.UserName,
+            //            FirstName = cacheEntry.FirstName,
+            //            LastName = cacheEntry.LastName
+            //        });
+            //        //cacheValues[key] = value;
+            //    }
+            //}
+
+            return _lst;
+        }
+
+        [AllowAnonymous]
+        //[HasPermission("Users.RemoveSession")]
+        [HttpPost]
+        [Route("security/session/remove/{id}")]
+        public async Task<IActionResult> RemoveUserSession(string id)
+        {
+            //await _log.AddAPILog(id, "api/security/session/remove", $"User Id - {id}", "", "", (byte)ApiLogEnum.LOG);
+
+            try
+            {
+                await RemoveLoginSession(id, "");
+                //await _log.AddAPILog(id, "api/security/session/remove", $"User Id - {id}", "", "Session Remove:OK", (byte)ApiLogEnum.LOG);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                var _response = JsonConvert.SerializeObject(ex);
+                //await _log.AddAPILog(id, "api/security/session/remove", $"User Id - {id}", $"{_response}", "Session Remove:Error", (byte)ApiLogEnum.ERROR);
+                return UnprocessableEntity(new { code = 422, msg = "Data cannot be Proccessed", data = "" });
+            }
+        }
+
+        private async Task RemoveLoginSession(string UserId, string DeviceId)
+        {
+            try
+            {
+                //var _session = await _context.UserDeviceSessions
+                //    .Where(_context => _context.UserId == UserId).ToListAsync();
+
+                //if (_session.Count() > 0)
+                //{
+                //    _context.UserDeviceSessions.RemoveRange(_session);
+                //}
+
+                //_memoryCache.Remove($"signin-{DeviceId}");
+
+                await RemoveSessionFromDb(UserId);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        private async Task RemoveSessionFromDb(string UserId)
+        {
+            //var _session = await _context.UserDeviceSessions.Where(x => x.UserId == UserId).ToListAsync();
+
+            //if (_session.Count() > 0)
+            //{
+            //    _memoryCache.Remove($"signin-{_session.FirstOrDefault().DeviceId}");
+            //    _context.UserDeviceSessions.RemoveRange(_session);
+            //    await _context.SaveChangesAsync();
+            //}
+        }
+
     }
 }

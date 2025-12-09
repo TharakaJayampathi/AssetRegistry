@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AssetRegistry.Models.Claims
+namespace AssetRegistry.Models.RolePermission
 {
-    public class ClaimType
+    public class RolePermission
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public int Resource { get; set; }
-        public string Claim { get; set; }
+        public string RoleId { get; set; }
+        public int PermissionType { get; set; }
     }
 }

@@ -3,12 +3,11 @@ using AssetRegistry.DTOs.LoginDTO;
 using AssetRegistry.DTOs.Users;
 using AssetRegistry.Extensions;
 using AssetRegistry.Interfaces;
-using AssetRegistry.Models.Permissions;
-using AssetRegistry.Models.Roles;
+using AssetRegistry.Models.Permission;
+using AssetRegistry.Models.Role;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -285,7 +284,7 @@ namespace AssetRegistry.Services
             if (_userRole.Name == "SuperAdmin")
             {
                 _permissions = await _context.Permissions
-                                /*.Where(x => x.IsActive == true)*/
+                                .Where(x => x.IsActive == true)
                                 .Select(x => x.Name)
                                 .ToListAsync();
             }

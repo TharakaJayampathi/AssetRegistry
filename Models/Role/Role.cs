@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace AssetRegistry.Models.Roles
+namespace AssetRegistry.Models.Role
 {
     public class Role : IdentityRole
     {

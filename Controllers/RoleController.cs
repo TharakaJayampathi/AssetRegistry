@@ -1,7 +1,7 @@
 ﻿using AssetRegistry.DTOs.Response;
 using AssetRegistry.DTOs.Roles;
-using AssetRegistry.Models.RolePermissions;
-using AssetRegistry.Models.Roles;
+using AssetRegistry.Models.Role;
+using AssetRegistry.Models.RolePermission;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

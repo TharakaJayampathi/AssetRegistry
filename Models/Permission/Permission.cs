@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AssetRegistry.Models.Permissions
+namespace AssetRegistry.Models.Permission
 {
     public class Permission
     {
@@ -10,6 +10,6 @@ namespace AssetRegistry.Models.Permissions
         public int Id { get; set; }
         public string Name { get; set; }
         public int Type { get; set; }
-        //public bool IsActive { get; set; }
+        public bool IsActive { get; set; }
     }
 }

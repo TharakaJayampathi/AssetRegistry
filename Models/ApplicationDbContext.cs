@@ -1,8 +1,10 @@
-﻿using AssetRegistry.Models.Claims;
+﻿using AssetRegistry.Models.Claim;
 using AssetRegistry.Models.Company;
-using AssetRegistry.Models.Permissions;
-using AssetRegistry.Models.RolePermissions;
-using AssetRegistry.Models.Roles;
+using AssetRegistry.Models.Division;
+using AssetRegistry.Models.Location;
+using AssetRegistry.Models.Permission;
+using AssetRegistry.Models.Role;
+using AssetRegistry.Models.RolePermission;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +31,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<ApplicationUser> ApplicationUsers { get; set; }
     public DbSet<Company> Companies { get; set; }
+    public DbSet<Division> Divisions { get; set; }
+    public DbSet<Location> Locations { get; set; }
     public DbSet<ClaimType> ClaimTypes { get; set; }
     public DbSet<UserAuthToken> UserAuthTokens { get; set; }
     public DbSet<UserRefreshToken> UserRefreshTokens { get; set; }

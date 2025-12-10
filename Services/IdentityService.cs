@@ -119,39 +119,6 @@ namespace AssetRegistry.Services
             return false;
         }
 
-        public async Task<bool> IsSessionValid(string Session, string DeviceId)
-        {
-            var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(Session).Payload;
-
-            var _postedUser = _tokenstring["oid"].ToString();
-            var _requestSignature = _tokenstring["signature"].ToString();
-
-            string _sessionValue = "";
-
-            //if (_memoryCache.TryGetValue($"signin-{DeviceId}", out _sessionValue))
-            //{
-            var _expireTime = Convert.ToInt64(_sessionValue.Split('_')[0].ToString());
-            var _signature = _sessionValue.Split('_')[1].ToString();
-
-            var _currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            if (_expireTime > _currentTime)
-            {
-                if (_signature == _requestSignature)
-                {
-                    return true;
-                }
-
-            }
-
-            //return false;
-            //}
-
-            return false;
-            //return true;
-
-        }
-
         public async Task<LoginResponseDTO> GetToken(string userName, string password, string AppId = "", string DeviceId = "")
         {
             //ApplicationUser _user = await _identityService.GetUserByName(userName);

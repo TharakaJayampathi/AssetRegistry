@@ -96,7 +96,46 @@ namespace AssetRegistry.Controllers
             try
             {
                 var _role = await _roleManager.FindByIdAsync(id);
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _role });
+                var _permissions = await _context.Permissions.ToListAsync();
+
+                RoleListDTO role = new RoleListDTO();
+                role.Id = _role.Id;
+                role.RoleName = _role.Name;
+
+                List<string> permissionList = new List<string>();
+
+                if (_role.Name == "SuperAdmin")
+                {
+                    var _permissionList = _permissions
+                            .Where(x => x.IsActive == true)
+                            .Select(x => x.Name)
+                            .ToList();
+                    foreach (var _perm in _permissionList)
+                    {
+                        permissionList.Add(_perm);
+                    }
+                }
+                else
+                {
+                    var _rolePermissionsByRoleId = await _context.RolePermissions.Where(x => x.RoleId == _role.Id).ToListAsync();
+                    foreach (var _rolePermissionByRoleId in _rolePermissionsByRoleId)
+                    {
+                        var _permission = _permissions
+                                .Where(x => x.Type == _rolePermissionByRoleId.PermissionType)
+                                .Select(x => x.Name)
+                                .FirstOrDefault();
+                        permissionList.Add(_permission);
+                    }
+                }
+                role.Permissions = permissionList;
+
+                var _roleDataByRoleId = await _context.RoleDatas.Where(x => x.RoleId == _role.Id).FirstOrDefaultAsync();
+                if (_roleDataByRoleId != null)
+                {
+                    role.IsActive = _roleDataByRoleId.IsActive;
+                }
+
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = role });
             }
             catch (Exception ex)
             {

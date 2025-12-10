@@ -26,7 +26,16 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _divisions = await _context.Divisions.ToListAsync();
+                var _divisions = await (from di in _context.Divisions
+                                        join co in _context.Companies on di.CompanyId equals co.Id into co_join
+                                        from co in co_join.DefaultIfEmpty()
+                                        select new DivisionListDTO()
+                                        {
+                                            Id = di.Id,
+                                            DivisionId = di.Code,
+                                            DivisionName = di.Name,
+                                            CompanyName = co.Name
+                                        }).FirstOrDefaultAsync();
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _divisions });
             }
             catch (Exception ex)
@@ -42,7 +51,17 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _division = await _context.Divisions.Where(x => x.Id == id).FirstOrDefaultAsync();
+                var _division = await (from di in _context.Divisions
+                                        join co in _context.Companies on di.CompanyId equals co.Id into co_join
+                                        from co in co_join.DefaultIfEmpty()
+                                        where di.Id == id
+                                        select new DivisionDTO()
+                                        {
+                                            Id = di.Id,
+                                            DivisionId = di.Code,
+                                            DivisionName = di.Name,
+                                            CompanyName = co.Name
+                                        }).FirstOrDefaultAsync();
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _division });
             }
             catch (Exception ex)

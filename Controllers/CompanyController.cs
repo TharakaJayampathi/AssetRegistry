@@ -26,8 +26,15 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var companies = await _context.Companies.ToListAsync();
-                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = companies });
+                var _companies = await (from co in _context.Companies
+                                        select new CompanyListDTO()
+                                        {
+                                            Id = co.Id,
+                                            CompanyId = co.Code,
+                                            CompanyName = co.Name,
+                                            IsActive = co.IsActive
+                                        }).ToListAsync();
+                return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _companies });
             }
             catch (Exception ex)
             {
@@ -42,7 +49,15 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _company = await _context.Companies.Where(x => x.Id == id).FirstOrDefaultAsync();
+                var _company = await (from co in _context.Companies
+                                      where co.Id == id
+                                      select new CompanyDTO()
+                                      {
+                                          Id = co.Id,
+                                          CompanyId = co.Code,
+                                          CompanyName = co.Name,
+                                          IsActive = co.IsActive
+                                      }).ToListAsync();
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _company });
             }
             catch (Exception ex)

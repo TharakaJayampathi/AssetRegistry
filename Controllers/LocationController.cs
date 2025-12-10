@@ -1,4 +1,5 @@
 ﻿using AssetRegistry.Attributes;
+using AssetRegistry.DTOs.Division;
 using AssetRegistry.DTOs.Location;
 using AssetRegistry.DTOs.Response;
 using AssetRegistry.Models.Location;
@@ -26,7 +27,21 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _locations = await _context.Companies.ToListAsync();
+                var _locations = await (from lo in _context.Locations
+                                        join co in _context.Companies on lo.CompanyId equals co.Id into co_join
+                                        from co in co_join.DefaultIfEmpty()
+                                        join di in _context.Divisions on co.Id equals di.CompanyId into di_join
+                                        from di in di_join.DefaultIfEmpty()
+                                        select new LocationListDTO()
+                                        {
+                                            Id = lo.Id,
+                                            LocationId = lo.Code,
+                                            LocationAddress = lo.Address,
+                                            CompanyName = co.Name,
+                                            DivisionId = di.Code,
+                                            DivisionName = di.Name,
+                                            IsActive = lo.IsActive
+                                        }).FirstOrDefaultAsync();
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _locations });
             }
             catch (Exception ex)
@@ -42,7 +57,22 @@ namespace AssetRegistry.Controllers
         {
             try
             {
-                var _location = await _context.Companies.Where(x => x.Id == id).FirstOrDefaultAsync();
+                var _location = await (from lo in _context.Locations
+                                        join co in _context.Companies on lo.CompanyId equals co.Id into co_join
+                                        from co in co_join.DefaultIfEmpty()
+                                        join di in _context.Divisions on co.Id equals di.CompanyId into di_join
+                                        from di in di_join.DefaultIfEmpty()
+                                        where lo.Id == id
+                                        select new LocationListDTO()
+                                        {
+                                            Id = lo.Id,
+                                            LocationId = lo.Code,
+                                            LocationAddress = lo.Address,
+                                            CompanyName = co.Name,
+                                            DivisionId = di.Code,
+                                            DivisionName = di.Name,
+                                            IsActive = lo.IsActive
+                                        }).FirstOrDefaultAsync();
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _location });
             }
             catch (Exception ex)

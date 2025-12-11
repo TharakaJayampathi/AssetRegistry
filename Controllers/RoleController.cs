@@ -38,7 +38,7 @@ namespace AssetRegistry.Controllers
             try
             {
                 var _roles = await _context.Roles.ToListAsync();
-                var _roleDatas = await _context.RoleDetails.ToListAsync();
+                var _roleDetails = await _context.RoleDetails.ToListAsync();
                 var _rolePermissions = await _context.RolePermissions.ToListAsync();
                 var _permissions = await _context.Permissions.ToListAsync();
 
@@ -76,10 +76,10 @@ namespace AssetRegistry.Controllers
                     }
                     role.Permissions = permissionList;
 
-                    var _roleDataByRoleId = _roleDatas.Where(x => x.RoleId == _role.Id).FirstOrDefault();
-                    if (_roleDataByRoleId != null)
+                    var _roleDetailByRoleId = _roleDetails.Where(x => x.RoleId == _role.Id).FirstOrDefault();
+                    if (_roleDetailByRoleId != null)
                     {
-                        role.IsActive = _roleDataByRoleId.IsActive;
+                        role.IsActive = _roleDetailByRoleId.IsActive;
                     }
 
                     rolesList.Add(role);
@@ -134,10 +134,10 @@ namespace AssetRegistry.Controllers
                 }
                 role.Permissions = permissionList;
 
-                var _roleDataByRoleId = await _context.RoleDetails.Where(x => x.RoleId == _role.Id).FirstOrDefaultAsync();
-                if (_roleDataByRoleId != null)
+                var _roleDetailByRoleId = await _context.RoleDetails.Where(x => x.RoleId == _role.Id).FirstOrDefaultAsync();
+                if (_roleDetailByRoleId != null)
                 {
-                    role.IsActive = _roleDataByRoleId.IsActive;
+                    role.IsActive = _roleDetailByRoleId.IsActive;
                 }
 
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = role });
@@ -171,11 +171,11 @@ namespace AssetRegistry.Controllers
                     var _roleDetail = _context.Roles.Where(x => x.Name == model.RoleName).FirstOrDefault();
                     if (_roleDetail != null)
                     {
-                        RoleDetail roleData = new RoleDetail();
-                        roleData.RoleId = _roleDetail.Id;
-                        roleData.Code = model.Code;
-                        roleData.IsActive = true;
-                        _context.RoleDetails.Add(roleData);
+                        RoleDetail roleDetail = new RoleDetail();
+                        roleDetail.RoleId = _roleDetail.Id;
+                        roleDetail.Code = model.Code;
+                        roleDetail.IsActive = true;
+                        _context.RoleDetails.Add(roleDetail);
                         await _context.SaveChangesAsync();
 
                         List<RolePermission> rolePermissionList = new List<RolePermission>();
@@ -223,12 +223,12 @@ namespace AssetRegistry.Controllers
                 var _res = await _roleManager.UpdateAsync(_role);
                 if (_res.Succeeded)
                 {
-                    var roleData = _context.RoleDetails.Where(x => x.RoleId == model.RoleId).FirstOrDefault();
-                    if (roleData != null)
+                    var roleDetail = _context.RoleDetails.Where(x => x.RoleId == model.RoleId).FirstOrDefault();
+                    if (roleDetail != null)
                     {
-                        roleData.Code = model.Code;
-                        roleData.IsActive = model.IsActive;
-                        _context.RoleDetails.Update(roleData);
+                        roleDetail.Code = model.Code;
+                        roleDetail.IsActive = model.IsActive;
+                        _context.RoleDetails.Update(roleDetail);
                         await _context.SaveChangesAsync();
 
                         var _existingRolePermissions = await _context.RolePermissions.Where(x => x.RoleId == model.RoleId).ToListAsync();
@@ -267,11 +267,11 @@ namespace AssetRegistry.Controllers
                 var _postedUser = _tokenstring["oid"].ToString();
                 var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
-                var roleData = _context.RoleDetails.Where(x => x.RoleId == id).FirstOrDefault();
-                if (roleData != null)
+                var roleDetail = _context.RoleDetails.Where(x => x.RoleId == id).FirstOrDefault();
+                if (roleDetail != null)
                 {
-                    roleData.IsActive = false;
-                    _context.RoleDetails.Update(roleData);
+                    roleDetail.IsActive = false;
+                    _context.RoleDetails.Update(roleDetail);
                     await _context.SaveChangesAsync();
                 }
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Role deactivate successfully", data = "" });

@@ -22,6 +22,7 @@ namespace AssetRegistry.Services
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IDateTimeService _dateTimeService;
         private readonly string? _key;
         private readonly int _validity;
         private readonly int _userSessionValidity;
@@ -31,7 +32,8 @@ namespace AssetRegistry.Services
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ApplicationDbContext context,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IDateTimeService dateTimeService)
         {
             _key = configuration.GetSection("Jwt")["Secret"];
             _validity = Convert.ToInt32(configuration.GetSection("Jwt")["Validity"]);
@@ -42,6 +44,7 @@ namespace AssetRegistry.Services
             _signInManager = signInManager;
             _context = context;
             _configuration = configuration;
+            _dateTimeService = dateTimeService;
         }
 
         public async Task<bool> IsSessionValid(string Session)
@@ -273,13 +276,13 @@ namespace AssetRegistry.Services
                     {
                         UserId = UserId,
                         AuthToken = AuthToken,
-                        ExpireOn = GetUnixTime(ExpireOn)
+                        ExpireOn = _dateTimeService.GetUnixTime(ExpireOn)
                     });
                 }
                 else
                 {
                     _authToken.AuthToken = AuthToken;
-                    _authToken.ExpireOn = GetUnixTime(ExpireOn);
+                    _authToken.ExpireOn = _dateTimeService.GetUnixTime(ExpireOn);
                 }
                 var _res = await _context.SaveChangesAsync();
             }
@@ -301,13 +304,13 @@ namespace AssetRegistry.Services
                     {
                         UserId = UserId,
                         RefreshToken = RefreshToken,
-                        ExpireOn = GetUnixTime(ExpireOn)
+                        ExpireOn = _dateTimeService.GetUnixTime(ExpireOn)
                     });
                 }
                 else
                 {
                     _refreshToken.RefreshToken = RefreshToken;
-                    _refreshToken.ExpireOn = GetUnixTime(ExpireOn);
+                    _refreshToken.ExpireOn = _dateTimeService.GetUnixTime(ExpireOn);
                 }
                 var _res = await _context.SaveChangesAsync();
             }
@@ -316,11 +319,6 @@ namespace AssetRegistry.Services
 
                 throw new Exception(ex.Message);
             }
-        }
-
-        private long GetUnixTime(DateTime Date)
-        {
-            return new DateTimeOffset(Date).ToUnixTimeSeconds();
         }
 
         public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
@@ -353,7 +351,7 @@ namespace AssetRegistry.Services
                 return Result.Failure("Refresh Token Not Found.Please Sign in Using your Username and Password");
             }
 
-            var _nowTime = GetUnixTime(DateTime.UtcNow);
+            var _nowTime = _dateTimeService.GetUnixTime(DateTime.UtcNow);
 
             if ((_refreshToken.RefreshToken == RefreshToken) && (_refreshToken.ExpireOn > _nowTime))
             {

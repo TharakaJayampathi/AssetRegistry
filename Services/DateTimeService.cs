@@ -200,5 +200,14 @@ namespace AssetRegistry.Services
 
             //Console.WriteLine($"{hours} hours is equal to {formattedTime}");
         }
+
+        public DateTime GetLocalTime(DateTime dateTimeToConvert, string TimeZoneId = "Sri Lanka Standard Time")
+        {
+            if (string.IsNullOrEmpty(TimeZoneId))
+            {
+                TimeZoneId = TimeZoneInfo.Local.Id;
+            }
+            return TimeZoneInfo.ConvertTime(dateTimeToConvert, GetTimeZone(TimeZoneId));
+        }
     }
 }

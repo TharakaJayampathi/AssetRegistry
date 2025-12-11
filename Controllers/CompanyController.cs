@@ -1,6 +1,7 @@
 ﻿using AssetRegistry.Attributes;
 using AssetRegistry.DTOs.Company;
 using AssetRegistry.DTOs.Response;
+using AssetRegistry.Interfaces;
 using AssetRegistry.Models.Company;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Identity;
@@ -17,11 +18,16 @@ namespace AssetRegistry.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
+        private readonly IDateTimeService _dateTimeService;
 
-        public CompanyController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public CompanyController(
+            UserManager<ApplicationUser> userManager, 
+            ApplicationDbContext context,
+            IDateTimeService dateTimeService)
         {
             _userManager = userManager;
             _context = context;
+            _dateTimeService = dateTimeService;
         }
 
         [HasPermission("Company.Read")]

@@ -1,6 +1,7 @@
 ﻿using AssetRegistry.Attributes;
 using AssetRegistry.DTOs.Response;
 using AssetRegistry.DTOs.Role;
+using AssetRegistry.Interfaces;
 using AssetRegistry.Models.Role;
 using AssetRegistry.Models.RolePermission;
 using AssetRegistry.Models.User;
@@ -19,15 +20,18 @@ namespace AssetRegistry.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _context;
+        private readonly IDateTimeService _dateTimeService;
 
         public RoleController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IDateTimeService dateTimeService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _context = context;
+            _dateTimeService = dateTimeService;
         }
 
         [HasPermission("Role.Read")]

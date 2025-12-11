@@ -1,6 +1,7 @@
 ﻿using AssetRegistry.Attributes;
 using AssetRegistry.DTOs.Division;
 using AssetRegistry.DTOs.Response;
+using AssetRegistry.Interfaces;
 using AssetRegistry.Models.Division;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Identity;
@@ -17,11 +18,16 @@ namespace AssetRegistry.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
+        private readonly IDateTimeService _dateTimeService;
 
-        public DivisionController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public DivisionController(
+            UserManager<ApplicationUser> userManager, 
+            ApplicationDbContext context,
+            IDateTimeService dateTimeService)
         {
             _userManager = userManager;
             _context = context;
+            _dateTimeService = dateTimeService;
         }
 
         [HasPermission("Division.Read")]

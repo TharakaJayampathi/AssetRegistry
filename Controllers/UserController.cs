@@ -1,6 +1,7 @@
 ﻿using AssetRegistry.Attributes;
 using AssetRegistry.DTOs.Response;
 using AssetRegistry.DTOs.Users;
+using AssetRegistry.Interfaces;
 using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,15 +19,18 @@ namespace AssetRegistry.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _context;
+        private readonly IDateTimeService _dateTimeService;
 
         public UserController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IDateTimeService dateTimeService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _context = context;
+            _dateTimeService = dateTimeService;
         }
 
 
@@ -158,8 +162,8 @@ namespace AssetRegistry.Controllers
                     LocationId = model.LocationId,
                     SecurityStamp = Guid.NewGuid().ToString(),
                     IsActive = true,
-                    CreatedBy = "Admin",
-                    CreatedOn = DateTime.Now
+                    CreatedBy = _loggedInUser.UserName,
+                    CreatedOn = _dateTimeService.GetLocalTime(DateTime.Now)
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
@@ -216,6 +220,8 @@ namespace AssetRegistry.Controllers
                 _user.DivisionId = model.DivisionId;
                 _user.LocationId = model.LocationId;
                 _user.IsActive = model.IsActive;
+                _user.UpdatedBy = _loggedInUser.UserName;
+                _user.UpdatedOn = _dateTimeService.GetLocalTime(DateTime.Now);
 
                 var result = await _userManager.UpdateAsync(_user);
                 if (result.Succeeded)

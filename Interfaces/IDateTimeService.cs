@@ -14,5 +14,6 @@
         DateTime GetFromUnixTime(long TimeStamp);
         double CalculatWorkHours(DateTime From, DateTime To);
         string ConvertTimeToReadFormat(double hours);
+        DateTime GetLocalTime(DateTime dateTimeToConvert, string TimeZoneId = "Sri Lanka Standard Time");
     }
 }

@@ -6,6 +6,7 @@ using AssetRegistry.Models.RolePermission;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 
 namespace AssetRegistry.Controllers
@@ -150,6 +151,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 var _role = await _roleManager.FindByNameAsync(model.RoleName.Trim());
                 if (_role != null)
                 {
@@ -195,6 +200,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 var _role = await _roleManager.FindByIdAsync(model.RoleId);
                 var _roleByName = await _roleManager.FindByNameAsync(model.RoleName.Trim());
                 if (_roleByName != null)
@@ -247,6 +256,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 var roleData = _context.RoleDatas.Where(x => x.RoleId == id).FirstOrDefault();
                 if (roleData != null)
                 {

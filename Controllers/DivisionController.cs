@@ -4,6 +4,7 @@ using AssetRegistry.DTOs.Response;
 using AssetRegistry.Models.Division;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 
 namespace AssetRegistry.Controllers
@@ -77,6 +78,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 Division division = new Division();
                 division.Code = model.DivisionId;
                 division.Name = model.DivisionName;
@@ -100,6 +105,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 var _division = await _context.Divisions.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
                 if (_division != null)
                 {
@@ -129,6 +138,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 var _division = await _context.Divisions.Where(x => x.Id == id).FirstOrDefaultAsync();
                 if (_division != null)
                 {

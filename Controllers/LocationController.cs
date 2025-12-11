@@ -5,6 +5,7 @@ using AssetRegistry.DTOs.Response;
 using AssetRegistry.Models.Location;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 
 namespace AssetRegistry.Controllers
@@ -88,6 +89,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 Location location = new Location();
                 location.Code = model.LocatonId;
                 location.Address = model.LocationAddress;
@@ -112,6 +117,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 var _location = await _context.Locations.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
                 if (_location != null)
                 {
@@ -142,6 +151,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 var _location = await _context.Locations.Where(x => x.Id == id).FirstOrDefaultAsync();
                 if (_location != null)
                 {

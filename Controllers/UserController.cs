@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 
 namespace AssetRegistry.Controllers
@@ -123,6 +124,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 if (string.IsNullOrWhiteSpace(model.Email) || !new EmailAddressAttribute().IsValid(model.Email))
                 {
                     return UnprocessableEntity(new ResponseDTO { code = (int)HttpStatusCode.InternalServerError, msg = "Invalid email address", data = "" });
@@ -179,6 +184,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 if (string.IsNullOrWhiteSpace(model.Email) || !new EmailAddressAttribute().IsValid(model.Email))
                 {
                     return UnprocessableEntity(new ResponseDTO { code = (int)HttpStatusCode.InternalServerError, msg = "Invalid email address", data = "" });
@@ -238,6 +247,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 var _user = await _userManager.FindByIdAsync(id);
                 if (_user == null)
                 {

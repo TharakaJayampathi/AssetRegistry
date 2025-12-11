@@ -4,6 +4,7 @@ using AssetRegistry.DTOs.Response;
 using AssetRegistry.Models.Company;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 
 namespace AssetRegistry.Controllers
@@ -73,6 +74,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 Company company = new Company();
                 company.Code = model.CompanyId;
                 company.Name = model.Name;
@@ -95,6 +100,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 var _company = await _context.Companies.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
                 if (_company != null)
                 {
@@ -123,6 +132,10 @@ namespace AssetRegistry.Controllers
         {
             try
             {
+                var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
+                var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
+                var _postedUser = _tokenstring["oid"].ToString();
+
                 var _company = await _context.Companies.Where(x => x.Id == id).FirstOrDefaultAsync();
                 if (_company != null)
                 {

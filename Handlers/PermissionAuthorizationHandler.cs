@@ -25,11 +25,9 @@ namespace AssetRegistry.Handlers
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
         {
             var _httpresource = (DefaultHttpContext)context.Resource;
-
             var asdas = context.User.Identities;
-            if (context.User.IsInRole("SuperAdmin2"))
+            if (context.User.IsInRole("SuperAdmin"))
             {
-                //throw new PermissionDeniedException(HttpStatusCode.Unauthorized);
                 context.Succeed(requirement);
                 return;
             }
@@ -39,13 +37,7 @@ namespace AssetRegistry.Handlers
                     .Replace("Bearer ", "")
                     .Replace("bearer ", "");
 
-                //if (string.IsNullOrEmpty(jwtToken))
-                //{
-                //    jwtToken = _httpresource.HttpContext.Request.Headers["Authorization"].ToString().Replace("bearer ", "");
-                //}
-
                 using IServiceScope _scope = _serviceScopeFactory.CreateScope();
-
                 var _configuration = _scope.ServiceProvider.GetService<IConfiguration>();
                 var _identity = _scope.ServiceProvider.GetService<IIdentityService>();
 
@@ -70,13 +62,11 @@ namespace AssetRegistry.Handlers
 
 
                         var token = handler.ReadJwtToken(jwtToken);
-
                         var _oid = token.Claims.Where(x => x.Type == "oid").FirstOrDefault().Value;
                         var _signature = token.Claims.Where(x => x.Type == "signature").FirstOrDefault().Value;
 
                         var _permissions = token.Claims.Where(x => x.Type == "permissions")
                         .Select(x => x.Value).FirstOrDefault();
-                        //var permissionList = JsonConvert.DeserializeObject<HashSet<string>>(_permissions);
 
                         if (await _identity.IsSessionValid(jwtToken))
                         {
@@ -103,8 +93,6 @@ namespace AssetRegistry.Handlers
                     {
                         throw new JWTInvalidException(HttpStatusCode.Unauthorized, er.Message);
                     }
-
-
                 }
                 else
                 {
@@ -122,7 +110,6 @@ namespace AssetRegistry.Handlers
                         if (_signInManager.IsSignedIn(_httpresource.HttpContext.User))
                         {
                             var _httpContext = _httpContextAccessor.HttpContext;
-
                             IPermissionService _permissionService = _scope.ServiceProvider.GetRequiredService<IPermissionService>();
                             HashSet<string> _permissions = await _permissionService.GetPermissions(_userId);
 

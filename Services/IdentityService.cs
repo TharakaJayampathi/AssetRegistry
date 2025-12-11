@@ -47,97 +47,32 @@ namespace AssetRegistry.Services
         public async Task<bool> IsSessionValid(string Session)
         {
             var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(Session).Payload;
-
             var _postedUser = _tokenstring["oid"].ToString();
             var _requestSignature = _tokenstring["signature"].ToString();
-            //var _deviceId = _tokenstring["deviceId"].ToString();
-
-            //string _sessionValue = "";
-
-            //if (_memoryCache.TryGetValue($"signin-{_deviceId}", out _sessionValue))
-            //{
-            //    var _expireTime = Convert.ToInt64(_sessionValue.Split('_')[0].ToString());
-            //    var _signature = _sessionValue.Split('_')[1].ToString();
-
-            //    var _currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            //    if (_expireTime > _currentTime)
-            //    {
-            //        return true;
-            //        //if (_signature == _requestSignature)
-            //        //{
-            //        //    return true;
-            //        //}
-
-            //    }
-
-            //    return false;
-            //}
-
-            //return false;
-            ////return true;
-
-            //var _existingUserDeviceSession = await _context.UserDeviceSessions.Where(x => x.UserId == _postedUser).FirstOrDefaultAsync();
-
             var _tokenExpireTime = long.Parse(_tokenstring["exp"].ToString());
             var _tokenExpireTimeToUTC = DateTimeOffset.FromUnixTimeSeconds(_tokenExpireTime).UtcDateTime;
 
-            //if (_existingUserDeviceSession != null)
-            //{
-            //if (_existingUserDeviceSession.DeviceId == _deviceId)
-            //{
             if (_tokenExpireTimeToUTC > DateTime.UtcNow)
             {
-                //#region Session Configuration
-                //int Validity = -1;
-                //long unixTime = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
-                //int _maxValidity = 2000;
-
-                //if (Validity > 0)
-                //{
-                //    unixTime = DateTimeOffset.UtcNow.AddHours(Validity).ToUnixTimeSeconds();
-                //    _maxValidity = Validity;
-                //}
-
-                //_memoryCache.Set($"signin-{_deviceId}", $"{unixTime}_{_requestSignature}", TimeSpan.FromDays(_maxValidity));
-                //#endregion
-
                 return true;
             }
-            //}
-            //else
-            //{
-            //    await RemoveSessionFromDb(_postedUser);
-            //    return false;
-            //}
-            //}
-            //else
-            //{
-            //    return false;
-            //}
-
             return false;
         }
 
         public async Task<LoginResponseDTO> GetToken(string userName, string password, string AppId = "", string DeviceId = "")
         {
-            //ApplicationUser _user = await _identityService.GetUserByName(userName);
             ApplicationUser _user = await _userManager.FindByNameAsync(userName);
 
             if (_user is not null)
             {
-                //if (!string.IsNullOrEmpty(DeviceId))
-                //{
                 if (_user.IsActive)
                 {
                     var _signIn = await _signInManager.PasswordSignInAsync(_user, password, true, false);
 
                     if (_signIn.Succeeded)
                     {
-                        //string _jwtToken = await GenerateToken(_user, DeviceId: DeviceId);
                         string _jwtToken = await GenerateToken(_user);
                         string _refreshToken = await GenerateRefreshToken(_user.Id);
-
                         var _issuedat = DateTime.UtcNow;
                         var _expireson = _issuedat.AddDays(_validity);
                         //var _expireson = DateTime.Now.AddMinutes(10);
@@ -151,22 +86,8 @@ namespace AssetRegistry.Services
                             issued_at = _issuedat,
                             expires_on = _expireson
                         };
-
-                        //if (_user.IsNewUser)
-                        //{
-                        //    await _identityService.SetLoginSession(_jwtToken, _userSessionValidity, DeviceId, true);
-                        //    return _json;
-                        //}
-                        //else
-                        //{
-                        //    await _identityService.RemoveSessionFromDb(_user.Id);
-                        //    await _identityService.SetLoginSession(_jwtToken, _userSessionValidity, DeviceId);
-                        //    return _json;
-                        //}
-
                         await SetLoginSession(_jwtToken, _userSessionValidity);
                         return _json;
-
                     }
                     else
                     {
@@ -176,11 +97,8 @@ namespace AssetRegistry.Services
                             code = 401,
                             msg = "Sign In Failed.Username or Password is Incorrect",
                             access_token = "",
-                            refresh_token = "",
-                            //issued_at = "",
-                            //expires_on = ""
+                            refresh_token = ""
                         };
-
                         return _json;
                     }
                 }
@@ -192,29 +110,10 @@ namespace AssetRegistry.Services
                         code = 401,
                         msg = "User is Not Acitve",
                         access_token = "",
-                        refresh_token = "",
-                        //issued_at = "",
-                        //expires_on = ""
+                        refresh_token = ""
                     };
-
                     return _json;
                 }
-                //}
-                //else
-                //{
-                //    var _json = new LoginResponseDTO
-                //    {
-                //        token_type = "",
-                //        code = 401,
-                //        msg = "Device Id is Required",
-                //        access_token = "",
-                //        refresh_token = "",
-                //        //issued_at = "",
-                //        //expires_on = ""
-                //    };
-
-                //    return _json;
-                //}
             }
             else
             {
@@ -224,11 +123,8 @@ namespace AssetRegistry.Services
                     code = 404,
                     msg = "User Not Found",
                     access_token = "",
-                    refresh_token = "",
-                    //issued_at = "",
-                    //expires_on = ""
+                    refresh_token = ""
                 };
-
                 return _json;
             }
         }
@@ -236,7 +132,6 @@ namespace AssetRegistry.Services
         public async Task<string> GenerateToken(ApplicationUser user, string SessionKey = "")
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
-            //var _permissions = await _permissionService.GetPermissions(user.Id);
             var _userRole = await (from userRole in _context.UserRoles
                                    join ro in _context.Roles on userRole.RoleId equals ro.Id
                                    where userRole.UserId == user.Id
@@ -271,7 +166,6 @@ namespace AssetRegistry.Services
                                       .ToListAsync();
             }
 
-            //var _userdetails = await _identityService.GetUserProfile(user.Id);
             var _userdetails = await (from us in _context.ApplicationUsers
                                       join ur in _context.UserRoles on us.Id equals ur.UserId
                                       join ro in _context.Roles on ur.RoleId equals ro.Id
@@ -288,18 +182,14 @@ namespace AssetRegistry.Services
 
             var _issuedAt = DateTime.UtcNow;
             var _notBefore = _issuedAt;
-
             var _expiresAt = _issuedAt.AddDays(_validity);
-            //var _expiresAt = DateTime.Now.AddMinutes(10);
 
             var _sessionKey = GenerateSignature();
-
             if (!string.IsNullOrEmpty(SessionKey))
             {
                 _sessionKey = SessionKey;
             }
 
-            //string[] _allowedApps = new string[] { "appid1", "appid2" };//Enabled if Multiple Modules available in the App
             List<string> _userPermissions = new List<string>();
 
             List<Claim> _claims = new List<Claim> {
@@ -310,12 +200,10 @@ namespace AssetRegistry.Services
                         new Claim("given_name", $"{user.FirstName}"),
                         new Claim("family_name", $"{user.LastName}"),
                         new Claim("name", $"{user.FirstName} {user.LastName}"),
-                        //new Claim("allowed_apps", $"[{_allowedApps[0]}, {_allowedApps[1]}]"), //passing Module/App Ids
                         new Claim("role", $"{_userdetails.RoleName}"),
                         new Claim("timeZone", ""),
                         new Claim("signature", _sessionKey)
-                        //new Claim("deviceId", DeviceId)
-                    };
+            };
 
             foreach (var permission in _permissions)
             {
@@ -325,33 +213,15 @@ namespace AssetRegistry.Services
             var _permissionArray = string.Join(",", _userPermissions.ToArray());
             _claims.Add(new Claim("permissions", $"{_permissionArray}"));
 
-
             var _signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
 
             var token = new JwtSecurityToken(
                 _configuration["Jwt:ValidAudience"],
                 _configuration["Jwt:ValidIssuer"],
-                //claims: claims,
                 claims: _claims,
                 notBefore: _notBefore,
                 expires: _expiresAt,
                 signingCredentials: _signIn);
-
-            //try
-            //{
-            //    var _userrole = await _identityService.GetUserRoles(user.Id);
-
-            //    LoginHistoryDTO loginHistroy = new();
-            //    loginHistroy.UserId = $"{user.UserName} - {string.Join(',', _userrole)}";
-            //    loginHistroy.DeviceId = "Mobile";
-            //    loginHistroy.LoginDate = DateTimeHelper.GetCurrentTime();
-            //    await _loginHistoryReopsitory.AddLoginHistory(loginHistroy);
-            //}
-            //catch
-            //{
-
-            //}
 
             var jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
             await AddAuthToken(user.Id, jwtToken, DateTime.UtcNow.AddDays(_validity));
@@ -361,10 +231,6 @@ namespace AssetRegistry.Services
 
         public async Task<string> GenerateRefreshToken(string UserId)
         {
-            //var randomNumber = new byte[64];
-            //using var rng = RandomNumberGenerator.Create();
-            //rng.GetBytes(randomNumber);
-
             var _refreshToken = GenerateSignature();
 
             await AddRefreshToken(UserId, _refreshToken, DateTime.UtcNow.AddDays(_refreshTokenValidity));
@@ -375,10 +241,8 @@ namespace AssetRegistry.Services
         public async Task<bool> SetLoginSession(string Session, int Validity, /*string DeviceId, */bool IsNewUser = false)
         {
             var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(Session).Payload;
-
             var _postedUser = _tokenstring["oid"].ToString();
             var _signature = _tokenstring["signature"].ToString();
-
             long unixTime = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
             int _maxValidity = 2000;
 
@@ -387,41 +251,15 @@ namespace AssetRegistry.Services
                 unixTime = DateTimeOffset.UtcNow.AddHours(Validity).ToUnixTimeSeconds();
                 _maxValidity = Validity;
             }
-
-            //var _user = await _userManager.FindByIdAsync(_postedUser);
-            //if (_user != null)
-            //{
-            //    if (IsNewUser && _user.FrAvailable == true)
-            //    {
-            //        _user.IsNewUser = false;
-            //        await _userManager.UpdateAsync(_user);
-            //    }
-            //}
-
-            //var _hasDeviceSession = await AddSessionToDb(DeviceId, _postedUser);
-
-            //if (!_hasDeviceSession)
-            //{
-            //    return false;
-            //}
-            //else
-            //{
-            //    _memoryCache.Set($"signin-{DeviceId}", $"{unixTime}_{_signature}", TimeSpan.FromDays(_maxValidity));
-            //    return true;
-            //}
             return true;
         }
 
         public static string GenerateSignature()
         {
             byte[] randomBytes = new byte[128];
-
             using var rng = RandomNumberGenerator.Create();
-
             rng.GetBytes(randomBytes);
-
             return Convert.ToBase64String(randomBytes).Replace("/", "--");
-
         }
 
         public async Task AddAuthToken(string UserId, string AuthToken, DateTime ExpireOn)
@@ -429,7 +267,6 @@ namespace AssetRegistry.Services
             try
             {
                 var _authToken = await _context.UserAuthTokens.FirstOrDefaultAsync(x => x.UserId == UserId);
-
                 if (_authToken is null)
                 {
                     await _context.UserAuthTokens.AddAsync(new UserAuthToken
@@ -444,12 +281,10 @@ namespace AssetRegistry.Services
                     _authToken.AuthToken = AuthToken;
                     _authToken.ExpireOn = GetUnixTime(ExpireOn);
                 }
-
                 var _res = await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-
                 throw new Exception(ex.Message);
             }
         }
@@ -474,7 +309,6 @@ namespace AssetRegistry.Services
                     _refreshToken.RefreshToken = RefreshToken;
                     _refreshToken.ExpireOn = GetUnixTime(ExpireOn);
                 }
-
                 var _res = await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -488,100 +322,6 @@ namespace AssetRegistry.Services
         {
             return new DateTimeOffset(Date).ToUnixTimeSeconds();
         }
-
-        //public async Task<UsersView> GetUserProfile(string UserKey)
-        //{
-        //    Guid _userKey;
-
-        //    var _allClaims = await _claimStore.GetClaims(ClaimCategories.MANAGE_USERS);
-
-        //    if (Guid.TryParse(UserKey, out _userKey))
-        //    {
-        //        var _user = await (from us in _context.Users
-        //                               //let div = (_context.DivisionUsers.Where(x => x.UserId == us.Id).ToList())
-        //                           join usr in _context.UserRoles on us.Id equals usr.UserId
-        //                           join role in _context.Roles on usr.RoleId equals role.Id
-        //                           where us.Id == UserKey
-        //                           select new UsersView
-        //                           {
-        //                               Id = us.Id,
-        //                               FirstName = us.FirstName,
-        //                               LastName = us.LastName,
-        //                               //Designation = us.Designation,
-        //                               IsActive = us.IsActive,
-        //                               PhoneNumber = us.PhoneNumber,
-        //                               Email = us.Email,
-        //                               RoleName = role.Name,
-        //                               RoleId = role.Id,
-        //                               UserName = us.UserName,
-        //                               //DivisionUsers = div,
-
-        //                           }).FirstOrDefaultAsync();
-
-        //        var _userClaims = await _context.UserClaims.Where(x => x.UserId == _user.Id).ToListAsync();
-
-        //        List<UserClaim> _lst = new List<UserClaim>();
-
-        //        foreach (var claim in _allClaims)
-        //        {
-        //            if (_userClaims.Where(x => x.ClaimType == claim.Type).FirstOrDefault() != null)
-        //            {
-        //                _lst.Add(new UserClaim { ClaimType = claim.Type, IsSelected = true });
-        //            }
-        //            else
-        //            {
-        //                _lst.Add(new UserClaim { ClaimType = claim.Type, IsSelected = false });
-        //            }
-        //        }
-
-        //        _user.UserClaims = _lst;
-
-        //        return _user;
-        //    }
-        //    else
-        //    {
-        //        var _user = await (from us in _context.Users
-        //                               //let div = (_context.DivisionUsers.Where(x => x.UserId == us.Id).ToList())
-        //                           join usr in _context.UserRoles on us.Id equals usr.UserId
-        //                           join role in _context.Roles on usr.RoleId equals role.Id
-        //                           where us.Email == UserKey
-        //                           select new UsersView
-        //                           {
-        //                               Id = us.Id,
-        //                               FirstName = us.FirstName,
-        //                               LastName = us.LastName,
-        //                               //Designation = us.Designation,
-        //                               IsActive = us.IsActive,
-        //                               PhoneNumber = us.PhoneNumber,
-        //                               Email = us.Email,
-        //                               RoleName = role.Name,
-        //                               RoleId = role.Id,
-        //                               UserName = us.UserName,
-        //                               //DivisionUsers = div,
-
-        //                           }).FirstOrDefaultAsync();
-
-        //        var _userClaims = await _context.UserClaims.Where(x => x.UserId == _user.Id).ToListAsync();
-
-        //        List<UserClaim> _lst = new List<UserClaim>();
-
-        //        foreach (var claim in _allClaims)
-        //        {
-        //            if (_userClaims.Where(x => x.ClaimType == claim.Type).FirstOrDefault() != null)
-        //            {
-        //                _lst.Add(new UserClaim { ClaimType = claim.Type, IsSelected = true });
-        //            }
-        //            else
-        //            {
-        //                _lst.Add(new UserClaim { ClaimType = claim.Type, IsSelected = false });
-        //            }
-        //        }
-
-        //        _user.UserClaims = _lst;
-
-        //        return _user;
-        //    }
-        //}
 
         public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {
@@ -601,10 +341,7 @@ namespace AssetRegistry.Services
             {
                 throw new SecurityTokenException("Invalid token");
             }
-
-
             return principal;
-
         }
 
         public async Task<Result> ValidateRefreshToken(string UserId, string RefreshToken)
@@ -616,7 +353,6 @@ namespace AssetRegistry.Services
                 return Result.Failure("Refresh Token Not Found.Please Sign in Using your Username and Password");
             }
 
-            //_dateTimeService.GetUnixTime()
             var _nowTime = GetUnixTime(DateTime.UtcNow);
 
             if ((_refreshToken.RefreshToken == RefreshToken) && (_refreshToken.ExpireOn > _nowTime))
@@ -624,55 +360,19 @@ namespace AssetRegistry.Services
                 return Result.Success();
             }
 
-            //return Result.Failure($"Expire: {_refreshToken.ExpireOn} Now: {_nowTime}");
             return Result.Failure("Refresh Token has been Changed.If This was Done without your Concent Please Sign in Using your Username and Password to Revoke the Current Token");
         }
-
-        //public async Task RemoveSessionFromDb(string UserId)
-        //{
-        //    var _session = await _context.UserDeviceSessions.Where(x => x.UserId == UserId).ToListAsync();
-
-        //    if (_session.Count() > 0)
-        //    {
-        //        _memoryCache.Remove($"signin-{_session.FirstOrDefault().DeviceId}");
-        //        _context.UserDeviceSessions.RemoveRange(_session);
-        //        await _context.SaveChangesAsync();
-        //    }
-        //}
 
         public async Task<Result> ChangePassword(string UserId, string OldPassword, string NewPassword)
         {
             var _user = await _userManager.FindByIdAsync(UserId);
-
             var result = await _userManager.ChangePasswordAsync(_user, OldPassword, NewPassword);
-
             return result.ToApplicationResult();
         }
 
         public async Task<IEnumerable<UsersView>> GetLoginSessions()
         {
             List<UsersView> _lst = new();
-
-            //Dictionary<string, object> cacheValues = new Dictionary<string, object>();
-            //var _users = await GetUsers();
-
-            //foreach (var cacheEntry in _users.Users)
-            //{
-            //    var key = cacheEntry.Id;
-
-            //    if (_memoryCache.TryGetValue($"signin-{key}", out var value))
-            //    {
-            //        _lst.Add(new UsersView
-            //        {
-            //            Id = cacheEntry.Id,
-            //            UserName = cacheEntry.UserName,
-            //            FirstName = cacheEntry.FirstName,
-            //            LastName = cacheEntry.LastName
-            //        });
-            //        //cacheValues[key] = value;
-            //    }
-            //}
-
             return _lst;
         }
 
@@ -680,34 +380,15 @@ namespace AssetRegistry.Services
         {
             try
             {
-                //var _session = await _context.UserDeviceSessions
-                //    .Where(_context => _context.UserId == UserId).ToListAsync();
-
-                //if (_session.Count() > 0)
-                //{
-                //    _context.UserDeviceSessions.RemoveRange(_session);
-                //}
-
-                //_memoryCache.Remove($"signin-{DeviceId}");
-
                 await RemoveSessionFromDb(UserId);
             }
             catch (Exception ex)
             {
-
             }
         }
 
         public async Task RemoveSessionFromDb(string UserId)
         {
-            //var _session = await _context.UserDeviceSessions.Where(x => x.UserId == UserId).ToListAsync();
-
-            //if (_session.Count() > 0)
-            //{
-            //    _memoryCache.Remove($"signin-{_session.FirstOrDefault().DeviceId}");
-            //    _context.UserDeviceSessions.RemoveRange(_session);
-            //    await _context.SaveChangesAsync();
-            //}
         }
     }
 }

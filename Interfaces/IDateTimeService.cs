@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace AssetRegistry.Interfaces
+﻿namespace AssetRegistry.Interfaces
 {
     public interface IDateTimeService
     {

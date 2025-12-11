@@ -76,7 +76,7 @@ namespace AssetRegistry.Handlers
                             }
                             else
                             {
-                                throw new PermissionDeniedException(HttpStatusCode.Forbidden);
+                                throw new JWTInvalidException(HttpStatusCode.Forbidden, "Permission Not Available");
                             }
                         }
                         else

@@ -34,7 +34,7 @@ namespace AssetRegistry.Controllers
             try
             {
                 var _roles = await _context.Roles.ToListAsync();
-                var _roleDatas = await _context.RoleDatas.ToListAsync();
+                var _roleDatas = await _context.RoleDetails.ToListAsync();
                 var _rolePermissions = await _context.RolePermissions.ToListAsync();
                 var _permissions = await _context.Permissions.ToListAsync();
 
@@ -130,7 +130,7 @@ namespace AssetRegistry.Controllers
                 }
                 role.Permissions = permissionList;
 
-                var _roleDataByRoleId = await _context.RoleDatas.Where(x => x.RoleId == _role.Id).FirstOrDefaultAsync();
+                var _roleDataByRoleId = await _context.RoleDetails.Where(x => x.RoleId == _role.Id).FirstOrDefaultAsync();
                 if (_roleDataByRoleId != null)
                 {
                     role.IsActive = _roleDataByRoleId.IsActive;
@@ -166,11 +166,11 @@ namespace AssetRegistry.Controllers
                     var _roleDetail = _context.Roles.Where(x => x.Name == model.RoleName).FirstOrDefault();
                     if (_roleDetail != null)
                     {
-                        RoleData roleData = new RoleData();
+                        RoleDetail roleData = new RoleDetail();
                         roleData.RoleId = _roleDetail.Id;
                         roleData.Code = model.Code;
                         roleData.IsActive = true;
-                        _context.RoleDatas.Add(roleData);
+                        _context.RoleDetails.Add(roleData);
                         await _context.SaveChangesAsync();
 
                         List<RolePermission> rolePermissionList = new List<RolePermission>();
@@ -217,12 +217,12 @@ namespace AssetRegistry.Controllers
                 var _res = await _roleManager.UpdateAsync(_role);
                 if (_res.Succeeded)
                 {
-                    var roleData = _context.RoleDatas.Where(x => x.RoleId == model.RoleId).FirstOrDefault();
+                    var roleData = _context.RoleDetails.Where(x => x.RoleId == model.RoleId).FirstOrDefault();
                     if (roleData != null)
                     {
                         roleData.Code = model.Code;
                         roleData.IsActive = model.IsActive;
-                        _context.RoleDatas.Update(roleData);
+                        _context.RoleDetails.Update(roleData);
                         await _context.SaveChangesAsync();
 
                         var _existingRolePermissions = await _context.RolePermissions.Where(x => x.RoleId == model.RoleId).ToListAsync();
@@ -260,11 +260,11 @@ namespace AssetRegistry.Controllers
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
 
-                var roleData = _context.RoleDatas.Where(x => x.RoleId == id).FirstOrDefault();
+                var roleData = _context.RoleDetails.Where(x => x.RoleId == id).FirstOrDefault();
                 if (roleData != null)
                 {
                     roleData.IsActive = false;
-                    _context.RoleDatas.Update(roleData);
+                    _context.RoleDetails.Update(roleData);
                     await _context.SaveChangesAsync();
                 }
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Role deactivate successfully", data = "" });

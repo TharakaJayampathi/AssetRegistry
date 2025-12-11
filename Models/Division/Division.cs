@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AssetRegistry.EntityBase;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AssetRegistry.Models.Division
 {
-    public class Division
+    public class Division : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -11,6 +12,5 @@ namespace AssetRegistry.Models.Division
         public string Code { get; set; }
         public string Name { get; set; }
         public int CompanyId { get; set; }
-        public bool IsActive { get; set; }
     }
 }

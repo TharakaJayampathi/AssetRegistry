@@ -36,7 +36,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ClaimType> ClaimTypes { get; set; }
     public DbSet<UserAuthToken> UserAuthTokens { get; set; }
     public DbSet<UserRefreshToken> UserRefreshTokens { get; set; }
-    public DbSet<RoleData> RoleDatas { get; set; }
+    public DbSet<RoleDetail> RoleDetails { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
 }

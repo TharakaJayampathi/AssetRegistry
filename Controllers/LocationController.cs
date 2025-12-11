@@ -3,6 +3,8 @@ using AssetRegistry.DTOs.Division;
 using AssetRegistry.DTOs.Location;
 using AssetRegistry.DTOs.Response;
 using AssetRegistry.Models.Location;
+using AssetRegistry.Models.User;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,10 +16,12 @@ namespace AssetRegistry.Controllers
     [ApiController]
     public class LocationController : ControllerBase
     {
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
 
-        public LocationController(ApplicationDbContext context)
+        public LocationController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
+            _userManager = userManager;
             _context = context;
         }
 
@@ -92,6 +96,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 Location location = new Location();
                 location.Code = model.LocatonId;
@@ -120,6 +125,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 var _location = await _context.Locations.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
                 if (_location != null)
@@ -154,6 +160,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 var _location = await _context.Locations.Where(x => x.Id == id).FirstOrDefaultAsync();
                 if (_location != null)

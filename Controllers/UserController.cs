@@ -127,6 +127,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 if (string.IsNullOrWhiteSpace(model.Email) || !new EmailAddressAttribute().IsValid(model.Email))
                 {
@@ -187,6 +188,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 if (string.IsNullOrWhiteSpace(model.Email) || !new EmailAddressAttribute().IsValid(model.Email))
                 {
@@ -250,6 +252,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 var _user = await _userManager.FindByIdAsync(id);
                 if (_user == null)

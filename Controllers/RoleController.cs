@@ -3,6 +3,7 @@ using AssetRegistry.DTOs.Response;
 using AssetRegistry.DTOs.Role;
 using AssetRegistry.Models.Role;
 using AssetRegistry.Models.RolePermission;
+using AssetRegistry.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,13 +16,16 @@ namespace AssetRegistry.Controllers
     [ApiController]
     public class RoleController : ControllerBase
     {
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _context;
 
         public RoleController(
+            UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ApplicationDbContext context)
         {
+            _userManager = userManager;
             _roleManager = roleManager;
             _context = context;
         }
@@ -154,6 +158,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 var _role = await _roleManager.FindByNameAsync(model.RoleName.Trim());
                 if (_role != null)
@@ -203,6 +208,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 var _role = await _roleManager.FindByIdAsync(model.RoleId);
                 var _roleByName = await _roleManager.FindByNameAsync(model.RoleName.Trim());
@@ -259,6 +265,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 var roleData = _context.RoleDetails.Where(x => x.RoleId == id).FirstOrDefault();
                 if (roleData != null)

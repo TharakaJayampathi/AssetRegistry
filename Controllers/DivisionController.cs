@@ -2,6 +2,8 @@
 using AssetRegistry.DTOs.Division;
 using AssetRegistry.DTOs.Response;
 using AssetRegistry.Models.Division;
+using AssetRegistry.Models.User;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,10 +15,12 @@ namespace AssetRegistry.Controllers
     [ApiController]
     public class DivisionController : ControllerBase
     {
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
 
-        public DivisionController(ApplicationDbContext context)
+        public DivisionController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
+            _userManager = userManager;
             _context = context;
         }
 
@@ -81,6 +85,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 Division division = new Division();
                 division.Code = model.DivisionId;
@@ -108,6 +113,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 var _division = await _context.Divisions.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
                 if (_division != null)
@@ -141,6 +147,7 @@ namespace AssetRegistry.Controllers
                 var _jwt = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Replace("bearer ", "");
                 var _tokenstring = new JwtSecurityTokenHandler().ReadJwtToken(_jwt).Payload;
                 var _postedUser = _tokenstring["oid"].ToString();
+                var _loggedInUser = await _userManager.FindByIdAsync(_postedUser);
 
                 var _division = await _context.Divisions.Where(x => x.Id == id).FirstOrDefaultAsync();
                 if (_division != null)

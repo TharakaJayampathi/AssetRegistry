@@ -34,12 +34,12 @@ namespace AssetRegistry.Controllers
             try
             {
                 string? _userId = null;
-                var _user = await _userManager.FindByNameAsync(Model.Username);
+                var _user = await _userManager.FindByNameAsync(Model.Email);
                 if (_user is not null)
                 {
                     _userId = _user.Id;
                 }
-                var _loginRes = await _identityService.GetToken(Model.Username, Model.Password);
+                var _loginRes = await _identityService.GetToken(Model.Email, Model.Password);
 
                 if (_loginRes.code == 200)
                 {

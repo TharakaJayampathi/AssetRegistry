@@ -156,6 +156,7 @@ namespace AssetRegistry.Controllers
                     LastName = model.LastName,
                     Email = model.Email,
                     UserName = model.Email,
+                    Code = model.Code,
                     PhoneNumber = model.PhoneNumber,
                     CompanyId = model.CompanyId,
                     DivisionId = model.DivisionId,

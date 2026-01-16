@@ -68,7 +68,7 @@ namespace AssetRegistry.Controllers
                                           CompanyId = co.Code,
                                           CompanyName = co.Name,
                                           IsActive = co.IsActive
-                                      }).ToListAsync();
+                                      }).FirstOrDefaultAsync();
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "success", data = _company });
             }
             catch (Exception ex)

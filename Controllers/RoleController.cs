@@ -175,23 +175,26 @@ namespace AssetRegistry.Controllers
                     var _roleDetail = _context.Roles.Where(x => x.Name == model.RoleName).FirstOrDefault();
                     if (_roleDetail != null)
                     {
-                        RoleDetail roleDetail = new RoleDetail();
-                        roleDetail.RoleId = _roleDetail.Id;
-                        roleDetail.Code = model.Code;
-                        roleDetail.IsActive = true;
-                        _context.RoleDetails.Add(roleDetail);
+                        RoleDetail roleData = new RoleDetail();
+                        roleData.RoleId = _roleDetail.Id;
+                        roleData.Code = model.Code;
+                        roleData.IsActive = true;
+                        _context.RoleDetails.Add(roleData);
                         await _context.SaveChangesAsync();
 
-                        List<RolePermission> rolePermissionList = new List<RolePermission>();
-                        foreach (var _permission in model.Permissions)
+                        if (model.RoleName != "SuperAdmin")
                         {
-                            RolePermission rolePermission = new RolePermission();
-                            rolePermission.RoleId = _roleDetail.Id;
-                            rolePermission.PermissionType = _permission;
-                            rolePermissionList.Add(rolePermission);
+                            List<RolePermission> rolePermissionList = new List<RolePermission>();
+                            foreach (var _permission in model.Permissions)
+                            {
+                                RolePermission rolePermission = new RolePermission();
+                                rolePermission.RoleId = _roleDetail.Id;
+                                rolePermission.PermissionType = _permission;
+                                rolePermissionList.Add(rolePermission);
+                            }
+                            _context.RolePermissions.AddRange(rolePermissionList);
+                            await _context.SaveChangesAsync();
                         }
-                        _context.RolePermissions.AddRange(rolePermissionList);
-                        await _context.SaveChangesAsync();
                     }
                 }
                 return Ok(new ResponseDTO { code = (int)HttpStatusCode.OK, msg = "Role created successfully", data = "" });
